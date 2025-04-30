@@ -1,0 +1,11 @@
+# Core requirements for Active Share Optimizer
+streamlit
+pandas
+numpy
+pulp
+openpyxl
+et_xmlfile
+python-dateutil
+pytz
+six
+tzdata

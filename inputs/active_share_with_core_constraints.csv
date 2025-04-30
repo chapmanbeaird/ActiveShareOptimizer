@@ -1,0 +1,508 @@
+Company Name,Sector,Ticker,Active Share,Bench Weight,Portfolio Weight,Core Model,Sector-and-Subsector
+Alphabet Inc. Class A,Communication Services,GOOGL,1.669732329,3.616166864,3.6845246,4,Consumer Cyclicals-Media and Entertainment
+"Netflix, Inc.",Communication Services,NFLX,0.226157264,0.846282947,1.298597475,3,Consumer Cyclicals-Media and Entertainment
+AT&T Inc.,Communication Services,T,0.200114332,0.400228663,0,1,Telecommunication Services-Telecommunication Services
+Verizon Communications Inc.,Communication Services,VZ,0.191730701,0.383461402,0,1,Telecommunication Services-Telecommunication Services
+Walt Disney Company,Communication Services,DIS,0.186390577,0.372781154,0,3,Consumer Cyclicals-Media and Entertainment
+Comcast Corporation Class A,Communication Services,CMCSA,0.145046536,0.290093072,0,1,Consumer Cyclicals-Media and Entertainment
+"T-Mobile US, Inc.",Communication Services,TMUS,0.130428373,0.260856746,0,1,Telecommunication Services-Telecommunication Services
+Meta Platforms Inc Class A,Communication Services,META,0.100880263,2.659892221,2.458131695,2,Consumer Cyclicals-Media and Entertainment
+"Charter Communications, Inc. Class A",Communication Services,CHTR,0.036502883,0.073005766,0,2,Consumer Cyclicals-Media and Entertainment
+"Take-Two Interactive Software, Inc.",Communication Services,TTWO,0.035655089,0.071310178,0,5,Consumer Cyclicals-Media and Entertainment
+Electronic Arts Inc.,Communication Services,EA,0.035584732,0.071169465,0,2,Consumer Cyclicals-Media and Entertainment
+"Warner Bros. Discovery, Inc. Series A",Communication Services,WBD,0.024741228,0.049482456,0,1,Consumer Cyclicals-Media and Entertainment
+"Live Nation Entertainment, Inc.",Communication Services,LYV,0.019934178,0.039868355,0,2,Consumer Cyclicals-Media and Entertainment
+Omnicom Group Inc,Communication Services,OMC,0.016392588,0.032785176,0,2,Consumer Cyclicals-Media and Entertainment
+Fox Corporation Class A,Communication Services,FOXA,0.012260201,0.024520403,0,1,Consumer Cyclicals-Media and Entertainment
+News Corporation Class A,Communication Services,NWSA,0.010845274,0.021690548,0,3,Consumer Cyclicals-Media and Entertainment
+"Interpublic Group of Companies, Inc.",Communication Services,IPG,0.010262067,0.020524135,0,1,Consumer Cyclicals-Media and Entertainment
+"Match Group, Inc.",Communication Services,MTCH,0.008159408,0.016318815,0,1,Consumer Cyclicals-Media and Entertainment
+Paramount Global Class B,Communication Services,PARA,0.007392105,0.01478421,0,3,Consumer Cyclicals-Media and Entertainment
+Fox Corporation Class B,Communication Services,FOX,0.006776995,0.013553989,0,1,Consumer Cyclicals-Media and Entertainment
+News Corporation Class B,Communication Services,NWS,0.003492472,0.006984944,0,3,Consumer Cyclicals-Media and Entertainment
+"Lowe's Companies, Inc.",Consumer Discretionary,LOW,1.113452571,0.267260551,2.494165693,2,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"Tesla, Inc.",Consumer Discretionary,TSLA,0.68691618,1.37383236,0,4,Consumer Cyclicals-Consumer Durables
+"Amazon.com, Inc.",Consumer Discretionary,AMZN,0.663177766,3.798681137,2.472325606,4,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"O'Reilly Automotive, Inc.",Consumer Discretionary,ORLY,0.574416513,0.161445403,1.310278429,2,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"Chipotle Mexican Grill, Inc.",Consumer Discretionary,CMG,0.547130089,0.139000433,1.233260611,4,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+Booking Holdings Inc.,Consumer Discretionary,BKNG,0.513385196,0.31624573,1.343016123,1,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+McDonald's Corporation,Consumer Discretionary,MCD,0.399878658,0.458086562,1.257843879,2,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"Home Depot, Inc.",Consumer Discretionary,HD,0.367635532,0.735271063,0,3,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+TJX Companies Inc,Consumer Discretionary,TJX,0.136500904,0.273001807,0,2,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+Starbucks Corporation,Consumer Discretionary,SBUX,0.117156646,0.234313291,0,4,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"NIKE, Inc. Class B",Consumer Discretionary,NKE,0.089075612,0.178151225,0,2,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"AutoZone, Inc.",Consumer Discretionary,AZO,0.062918327,0.125836653,0,2,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+Hilton Worldwide Holdings Inc.,Consumer Discretionary,HLT,0.05884878,0.117697559,0,1,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"Marriott International, Inc. Class A",Consumer Discretionary,MAR,0.058783659,0.117567318,0,4,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"Airbnb, Inc. Class A",Consumer Discretionary,ABNB,0.056843117,0.113686235,0,3,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+General Motors Company,Consumer Discretionary,GM,0.056588309,0.113176617,0,1,Consumer Cyclicals-Consumer Durables
+Royal Caribbean Group,Consumer Discretionary,RCL,0.055288039,0.110576078,0,2,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"Yum! Brands, Inc.",Consumer Discretionary,YUM,0.04587277,0.091745539,0,1,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"Ross Stores, Inc.",Consumer Discretionary,ROST,0.043038035,0.08607607,0,3,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+Ford Motor Company,Consumer Discretionary,F,0.040679427,0.081358854,0,2,Consumer Cyclicals-Consumer Durables
+"D.R. Horton, Inc.",Consumer Discretionary,DHI,0.0398113,0.0796226,0,1,Consumer Cyclicals-Consumer Durables
+lululemon athletica inc.,Consumer Discretionary,LULU,0.038154553,0.076309106,0,2,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+Garmin Ltd.,Consumer Discretionary,GRMN,0.033372914,0.066745829,0,1,Consumer Cyclicals-Consumer Durables
+eBay Inc.,Consumer Discretionary,EBAY,0.033089991,0.066179982,0,1,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+Lennar Corporation Class A,Consumer Discretionary,LEN,0.029852118,0.059704235,0,3,Consumer Cyclicals-Consumer Durables
+Tractor Supply Company,Consumer Discretionary,TSCO,0.028823581,0.057647162,0,4,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"Darden Restaurants, Inc.",Consumer Discretionary,DRI,0.024337825,0.04867565,0,2,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"NVR, Inc.",Consumer Discretionary,NVR,0.023204257,0.046408514,0,1,Consumer Cyclicals-Consumer Durables
+Carnival Corporation,Consumer Discretionary,CCL,0.022928289,0.045856579,0,4,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"PulteGroup, Inc.",Consumer Discretionary,PHM,0.022493686,0.044987372,0,1,Consumer Cyclicals-Consumer Durables
+"Expedia Group, Inc.",Consumer Discretionary,EXPE,0.022138695,0.04427739,0,1,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+Deckers Outdoor Corporation,Consumer Discretionary,DECK,0.018291407,0.036582813,0,1,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"Tapestry, Inc.",Consumer Discretionary,TPR,0.01768741,0.035374819,0,1,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+Genuine Parts Company,Consumer Discretionary,GPC,0.017483062,0.034966124,0,5,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"Domino's Pizza, Inc.",Consumer Discretionary,DPZ,0.016750765,0.033501529,0,3,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+Ulta Beauty Inc.,Consumer Discretionary,ULTA,0.016728408,0.033456815,0,2,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+Las Vegas Sands Corp.,Consumer Discretionary,LVS,0.015542391,0.031084781,0,5,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+Aptiv PLC,Consumer Discretionary,APTV,0.01529475,0.0305895,0,1,Consumer Cyclicals-Consumer Durables
+"Best Buy Co., Inc.",Consumer Discretionary,BBY,0.014949526,0.029899051,0,3,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+Pool Corporation,Consumer Discretionary,POOL,0.012691776,0.025383553,0,3,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"CarMax, Inc.",Consumer Discretionary,KMX,0.011556489,0.023112977,0,4,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+LKQ Corporation,Consumer Discretionary,LKQ,0.011086335,0.02217267,0,2,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+Ralph Lauren Corporation Class A,Consumer Discretionary,RL,0.009424981,0.018849962,0,1,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+Norwegian Cruise Line Holdings Ltd.,Consumer Discretionary,NCLH,0.00919224,0.01838448,0,3,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"Hasbro, Inc.",Consumer Discretionary,HAS,0.008244678,0.016489356,0,2,Consumer Cyclicals-Consumer Durables
+"Wynn Resorts, Limited",Consumer Discretionary,WYNN,0.008002113,0.016004225,0,3,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+MGM Resorts International,Consumer Discretionary,MGM,0.007664911,0.015329822,0,4,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+BorgWarner Inc.,Consumer Discretionary,BWA,0.006595073,0.013190147,0,1,Consumer Cyclicals-Consumer Durables
+Caesars Entertainment Inc,Consumer Discretionary,CZR,0.006250618,0.012501236,0,5,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"Mohawk Industries, Inc.",Consumer Discretionary,MHK,0.006237917,0.012475834,0,1,Consumer Cyclicals-Consumer Durables
+Walmart Inc.,Consumer Staples,WMT,0.859513636,0.775528631,2.494555904,3,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+Procter & Gamble Company,Consumer Staples,PG,0.806904199,0.821588652,2.43539705,3,Consumer Staples-Consumer Staples
+Costco Wholesale Corporation,Consumer Staples,COST,0.413021514,0.826043028,0,4,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+Coca-Cola Company,Consumer Staples,KO,0.281368898,0.562737796,0,4,Consumer Staples-Consumer Staples
+Philip Morris International Inc.,Consumer Staples,PM,0.246808546,0.493617093,0,1,Consumer Staples-Consumer Staples
+"PepsiCo, Inc.",Consumer Staples,PEP,0.210172656,0.420345311,0,4,Consumer Staples-Consumer Staples
+"Altria Group, Inc.",Consumer Staples,MO,0.102503117,0.205006234,0,1,Consumer Staples-Consumer Staples
+"Mondelez International, Inc. Class A",Consumer Staples,MDLZ,0.089015527,0.178031055,0,5,Consumer Staples-Consumer Staples
+Colgate-Palmolive Company,Consumer Staples,CL,0.076781952,0.153563904,0,2,Consumer Staples-Consumer Staples
+Target Corporation,Consumer Staples,TGT,0.049976119,0.099952238,0,2,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+Kimberly-Clark Corporation,Consumer Staples,KMB,0.048292474,0.096584948,0,3,Consumer Staples-Consumer Staples
+"Kenvue, Inc.",Consumer Staples,KVUE,0.046679444,0.093358887,0,5,Consumer Staples-Consumer Staples
+Kroger Co.,Consumer Staples,KR,0.042414768,0.084829537,0,2,Consumer Staples-Consumer Staples
+Keurig Dr Pepper Inc.,Consumer Staples,KDP,0.041550537,0.083101073,0,5,Consumer Staples-Consumer Staples
+Monster Beverage Corporation,Consumer Staples,MNST,0.04146517,0.08293034,0,3,Consumer Staples-Consumer Staples
+Sysco Corporation,Consumer Staples,SYY,0.036411098,0.072822196,0,4,Consumer Staples-Consumer Staples
+"General Mills, Inc.",Consumer Staples,GIS,0.03368902,0.06737804,0,3,Consumer Staples-Consumer Staples
+"Constellation Brands, Inc. Class A",Consumer Staples,STZ,0.029072924,0.058145848,0,5,Consumer Staples-Consumer Staples
+"Church & Dwight Co., Inc.",Consumer Staples,CHD,0.027561998,0.055123996,0,4,Consumer Staples-Consumer Staples
+Kraft Heinz Company,Consumer Staples,KHC,0.027305044,0.054610088,0,3,Consumer Staples-Consumer Staples
+Hershey Company,Consumer Staples,HSY,0.025303986,0.050607973,0,4,Consumer Staples-Consumer Staples
+Archer-Daniels-Midland Company,Consumer Staples,ADM,0.023160645,0.046321289,0,3,Consumer Staples-Consumer Staples
+Kellanova,Consumer Staples,K,0.023057043,0.046114086,0,2,Consumer Staples-Consumer Staples
+"McCormick & Company, Incorporated",Consumer Staples,MKC,0.021178513,0.042357026,0,5,Consumer Staples-Consumer Staples
+Clorox Company,Consumer Staples,CLX,0.018721478,0.037442957,0,4,Consumer Staples-Consumer Staples
+Dollar General Corporation,Consumer Staples,DG,0.018694591,0.037389183,0,4,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"Tyson Foods, Inc. Class A",Consumer Staples,TSN,0.017987348,0.035974696,0,2,Consumer Staples-Consumer Staples
+Estee Lauder Companies Inc. Class A,Consumer Staples,EL,0.016530956,0.033061913,0,5,Consumer Staples-Consumer Staples
+"Dollar Tree, Inc.",Consumer Staples,DLTR,0.013594972,0.027189944,0,4,Consumer Cyclicals-Retail and Other Consumer Cyclicals
+"Conagra Brands, Inc.",Consumer Staples,CAG,0.012860647,0.025721293,0,3,Consumer Staples-Consumer Staples
+J.M. Smucker Company,Consumer Staples,SJM,0.012110257,0.024220514,0,4,Consumer Staples-Consumer Staples
+Bunge Global SA,Consumer Staples,BG,0.01074673,0.021493459,0,4,Consumer Staples-Consumer Staples
+Molson Coors Beverage Company Class B,Consumer Staples,TAP,0.010723302,0.021446605,0,1,Consumer Staples-Consumer Staples
+Hormel Foods Corporation,Consumer Staples,HRL,0.008985412,0.017970825,0,4,Consumer Staples-Consumer Staples
+"Walgreens Boots Alliance, Inc.",Consumer Staples,WBA,0.008307221,0.016614442,0,3,Consumer Staples-Consumer Staples
+"Lamb Weston Holdings, Inc.",Consumer Staples,LW,0.007833758,0.015667516,0,5,Consumer Staples-Consumer Staples
+Campbell's Company,Consumer Staples,CPB,0.007768461,0.015536922,0,4,Consumer Staples-Consumer Staples
+Brown-Forman Corporation Class B,Consumer Staples,BF.B,0.006627433,0.013254865,0,5,Consumer Staples-Consumer Staples
+Chevron Corporation,Energy,CVX,1.031347602,0.57339984,2.636095045,1,"Energy:-Integrateds, Oil Service, Refiners and Other"
+Shell Plc Sponsored ADR,Energy,SHEL,0.65275893,0,1.30551786,1,"Energy:-Integrateds, Oil Service, Refiners and Other"
+Exxon Mobil Corporation,Energy,XOM,0.530319621,1.060639243,0,2,"Energy:-Integrateds, Oil Service, Refiners and Other"
+ConocoPhillips,Energy,COP,0.13778108,0.27556216,0,1,Energy:-Exploration and Production
+"Williams Companies, Inc.",Energy,WMB,0.075837773,0.151675546,0,4,"Energy:-Integrateds, Oil Service, Refiners and Other"
+"EOG Resources, Inc.",Energy,EOG,0.072777074,0.145554148,0,1,Energy:-Exploration and Production
+"ONEOK, Inc.",Energy,OKE,0.065003626,0.130007252,0,4,"Energy:-Integrateds, Oil Service, Refiners and Other"
+Schlumberger Limited,Energy,SLB,0.060681416,0.121362833,0,2,"Energy:-Integrateds, Oil Service, Refiners and Other"
+Kinder Morgan Inc Class P,Energy,KMI,0.056455289,0.112910578,0,3,"Energy:-Integrateds, Oil Service, Refiners and Other"
+Phillips 66,Energy,PSX,0.055387105,0.11077421,0,2,"Energy:-Integrateds, Oil Service, Refiners and Other"
+Marathon Petroleum Corporation,Energy,MPC,0.050841567,0.101683134,0,1,"Energy:-Integrateds, Oil Service, Refiners and Other"
+Baker Hughes Company Class A,Energy,BKR,0.046044485,0.092088971,0,2,"Energy:-Integrateds, Oil Service, Refiners and Other"
+Targa Resources Corp.,Energy,TRGP,0.045300634,0.090601267,0,3,"Energy:-Integrateds, Oil Service, Refiners and Other"
+Hess Corporation,Energy,HES,0.045277854,0.090555709,0,2,Energy:-Exploration and Production
+Valero Energy Corporation,Energy,VLO,0.044433624,0.088867247,0,1,"Energy:-Integrateds, Oil Service, Refiners and Other"
+Occidental Petroleum Corporation,Energy,OXY,0.033729565,0.067459131,0,2,"Energy:-Integrateds, Oil Service, Refiners and Other"
+EQT Corporation,Energy,EQT,0.033367974,0.066735947,0,5,Energy:-Exploration and Production
+"Diamondback Energy, Inc.",Energy,FANG,0.030830859,0.061661718,0,5,Energy:-Exploration and Production
+Texas Pacific Land Corporation,Energy,TPL,0.026906098,0.053812196,0,2,Energy:-Exploration and Production
+Devon Energy Corporation,Energy,DVN,0.024715505,0.049431009,0,3,Energy:-Exploration and Production
+Halliburton Company,Energy,HAL,0.022858553,0.045717105,0,1,"Energy:-Integrateds, Oil Service, Refiners and Other"
+Coterra Energy Inc.,Energy,CTRA,0.022237034,0.044474067,0,1,Energy:-Exploration and Production
+APA Corporation,Energy,APA,0.007924291,0.015848582,0,1,Energy:-Exploration and Production
+Blackstone Inc.,Financials,BX,1.223197692,0.223620668,2.670016052,3,Financials:-Capital Markets
+Arthur J. Gallagher & Co.,Financials,AJG,1.185428523,0.17393262,2.544789666,5,Financials:-Insurance
+American Express Company,Financials,AXP,1.137679348,0.313819377,2.589178073,4,"Financials:-Banks, Consumer Finance and Other"
+"S&P Global, Inc.",Financials,SPGI,1.096741938,0.328681379,2.522165255,1,Consumer Cyclicals-Commercial Services and Supplies
+Berkshire Hathaway Inc. Class B,Financials,BRK.B,1.00893972,2.017879441,0,3,"Financials:-Banks, Consumer Finance and Other"
+Visa Inc. Class A,Financials,V,0.607604242,1.215208484,0,1,Technology:-Technology Software and Services
+JPMorgan Chase & Co.,Financials,JPM,0.60517336,1.401051897,2.611398616,1,"Financials:-Banks, Consumer Finance and Other"
+Bank of America Corp,Financials,BAC,0.285019869,0.570039739,0,1,"Financials:-Banks, Consumer Finance and Other"
+Wells Fargo & Company,Financials,WFC,0.251381989,0.502763979,0,1,"Financials:-Banks, Consumer Finance and Other"
+"Goldman Sachs Group, Inc.",Financials,GS,0.175952694,0.351905389,0,1,Financials:-Capital Markets
+Mastercard Incorporated Class A,Financials,MA,0.170180492,0.915445997,1.25580698,1,Technology:-Technology Software and Services
+Progressive Corporation,Financials,PGR,0.167478449,0.334956899,0,3,Financials:-Insurance
+Morgan Stanley,Financials,MS,0.155576613,0.311153226,0,1,Financials:-Capital Markets
+"BlackRock, Inc.",Financials,BLK,0.14461286,0.289225719,0,4,Financials:-Capital Markets
+Charles Schwab Corp,Financials,SCHW,0.139414711,0.278829423,0,4,Financials:-Capital Markets
+Citigroup Inc.,Financials,C,0.1357984,0.2715968,0,1,"Financials:-Banks, Consumer Finance and Other"
+"Fiserv, Inc.",Financials,FI,0.131364451,0.262728902,0,2,Technology:-Technology Software and Services
+"Marsh & McLennan Companies, Inc.",Financials,MMC,0.119319645,0.238639289,0,3,Financials:-Insurance
+Chubb Limited,Financials,CB,0.114791191,0.229582381,0,3,Financials:-Insurance
+"Intercontinental Exchange, Inc.",Financials,ICE,0.104966696,0.209933392,0,4,Financials:-Capital Markets
+CME Group Inc. Class A,Financials,CME,0.100004329,0.200008658,0,3,Financials:-Capital Markets
+Aon Plc Class A,Financials,AON,0.088528908,0.177057815,0,3,Financials:-Insurance
+KKR & Co Inc,Financials,KKR,0.082028097,0.164056193,0,5,Financials:-Capital Markets
+Moody's Corporation,Financials,MCO,0.074599083,0.149198166,0,1,Consumer Cyclicals-Commercial Services and Supplies
+"PayPal Holdings, Inc.",Financials,PYPL,0.072706634,0.145413268,0,1,Technology:-Technology Software and Services
+"PNC Financial Services Group, Inc.",Financials,PNC,0.071640117,0.143280235,0,1,"Financials:-Banks, Consumer Finance and Other"
+Capital One Financial Corp,Financials,COF,0.069300807,0.138601615,0,1,"Financials:-Banks, Consumer Finance and Other"
+U.S. Bancorp,Financials,USB,0.069212656,0.138425311,0,1,"Financials:-Banks, Consumer Finance and Other"
+Apollo Global Management Inc,Financials,APO,0.067360774,0.134721548,0,4,"Financials:-Banks, Consumer Finance and Other"
+Bank of New York Mellon Corp,Financials,BK,0.063529914,0.127059828,0,1,Financials:-Capital Markets
+"Travelers Companies, Inc.",Financials,TRV,0.061329621,0.122659242,0,2,Financials:-Insurance
+Allstate Corporation,Financials,ALL,0.057943301,0.115886602,0,3,Financials:-Insurance
+Truist Financial Corporation,Financials,TFC,0.057120696,0.114241392,0,3,"Financials:-Banks, Consumer Finance and Other"
+Aflac Incorporated,Financials,AFL,0.056574309,0.113148618,0,2,Financials:-Insurance
+"American International Group, Inc.",Financials,AIG,0.054368397,0.108736794,0,2,Financials:-Insurance
+"MetLife, Inc.",Financials,MET,0.050088659,0.100177318,0,2,Financials:-Insurance
+"Ameriprise Financial, Inc.",Financials,AMP,0.049793594,0.099587189,0,1,Financials:-Capital Markets
+MSCI Inc. Class A,Financials,MSCI,0.04618101,0.09236202,0,2,Financials:-Capital Markets
+Discover Financial Services,Financials,DFS,0.042991474,0.085982947,0,1,"Financials:-Banks, Consumer Finance and Other"
+"Fidelity National Information Services, Inc.",Financials,FIS,0.041700495,0.083400989,0,2,Technology:-Technology Software and Services
+"Prudential Financial, Inc.",Financials,PRU,0.041049825,0.082099651,0,2,Financials:-Insurance
+"Hartford Insurance Group, Inc.",Financials,HIG,0.036100787,0.072201573,0,2,Financials:-Insurance
+Arch Capital Group Ltd.,Financials,ACGL,0.036068297,0.072136595,0,2,Financials:-Insurance
+Willis Towers Watson Public Limited Company,Financials,WTW,0.035083093,0.070166185,0,4,Financials:-Insurance
+"Nasdaq, Inc.",Financials,NDAQ,0.033138854,0.066277708,0,5,Financials:-Capital Markets
+M&T Bank Corporation,Financials,MTB,0.030566049,0.061132097,0,2,"Financials:-Banks, Consumer Finance and Other"
+"Brown & Brown, Inc.",Financials,BRO,0.029601697,0.059203393,0,3,Financials:-Insurance
+State Street Corporation,Financials,STT,0.027618862,0.055237724,0,1,Financials:-Capital Markets
+Fifth Third Bancorp,Financials,FITB,0.02751999,0.05503998,0,2,"Financials:-Banks, Consumer Finance and Other"
+"Raymond James Financial, Inc.",Financials,RJF,0.026990701,0.053981402,0,2,Financials:-Capital Markets
+"Corpay, Inc.",Financials,CPAY,0.025610106,0.051220212,0,2,Technology:-Technology Software and Services
+Cboe Global Markets Inc,Financials,CBOE,0.02392064,0.04784128,0,5,Financials:-Capital Markets
+Cincinnati Financial Corporation,Financials,CINF,0.02379851,0.047597019,0,4,Financials:-Insurance
+Huntington Bancshares Incorporated,Financials,HBAN,0.022613201,0.045226402,0,2,"Financials:-Banks, Consumer Finance and Other"
+Synchrony Financial,Financials,SYF,0.021832628,0.043665255,0,1,"Financials:-Banks, Consumer Finance and Other"
+T. Rowe Price Group,Financials,TROW,0.021524544,0.043049089,0,2,Financials:-Capital Markets
+Regions Financial Corporation,Financials,RF,0.020505317,0.041010634,0,2,"Financials:-Banks, Consumer Finance and Other"
+Northern Trust Corporation,Financials,NTRS,0.020398076,0.040796151,0,1,Financials:-Capital Markets
+W. R. Berkley Corporation,Financials,WRB,0.019927106,0.039854213,0,2,Financials:-Insurance
+Global Payments Inc.,Financials,GPN,0.019767924,0.039535847,0,1,Technology:-Technology Software and Services
+"Citizens Financial Group, Inc.",Financials,CFG,0.018799246,0.037598492,0,1,"Financials:-Banks, Consumer Finance and Other"
+"Principal Financial Group, Inc.",Financials,PFG,0.01843155,0.0368631,0,1,Financials:-Insurance
+FactSet Research Systems Inc.,Financials,FDS,0.017033687,0.034067374,0,5,Financials:-Capital Markets
+KeyCorp,Financials,KEY,0.01660414,0.03320828,0,4,"Financials:-Banks, Consumer Finance and Other"
+Loews Corporation,Financials,L,0.016599301,0.033198602,0,2,Financials:-Insurance
+"Everest Group, Ltd.",Financials,EG,0.015875105,0.031750209,0,2,Financials:-Insurance
+"Jack Henry & Associates, Inc.",Financials,JKHY,0.013319594,0.026639189,0,4,Technology:-Technology Software and Services
+"Assurant, Inc.",Financials,AIZ,0.011320251,0.022640502,0,3,Financials:-Insurance
+Globe Life Inc.,Financials,GL,0.01123895,0.0224779,0,1,Financials:-Insurance
+Erie Indemnity Company Class A,Financials,ERIE,0.010640726,0.021281452,0,4,Financials:-Insurance
+MarketAxess Holdings Inc.,Financials,MKTX,0.00854644,0.01709288,0,5,Financials:-Capital Markets
+Invesco Ltd.,Financials,IVZ,0.007261729,0.014523458,0,2,Financials:-Capital Markets
+"Franklin Resources, Inc.",Financials,BEN,0.006441089,0.012882178,0,4,Financials:-Capital Markets
+HCA Healthcare Inc,Health Care,HCA,1.238115907,0.126628993,2.602860808,2,Health Care:-Health Care Equipment and Services
+Vertex Pharmaceuticals Incorporated,Health Care,VRTX,1.107442338,0.273585894,2.488470569,5,Health Care:-Biotechnology
+Thermo Fisher Scientific Inc.,Health Care,TMO,1.033044955,0.413050724,2.479140634,3,Health Care:-Pharmaceuticals
+"IDEXX Laboratories, Inc.",Health Care,IDXX,0.60014873,0.071713015,1.272010475,3,Health Care:-Health Care Equipment and Services
+"Regeneron Pharmaceuticals, Inc.",Health Care,REGN,0.541469929,0.145226554,1.228166412,1,Health Care:-Biotechnology
+UnitedHealth Group Incorporated,Health Care,UNH,0.489868127,0.979736253,0,3,Health Care:-Health Care Equipment and Services
+Johnson & Johnson,Health Care,JNJ,0.408614213,0.817228426,0,1,Health Care:-Pharmaceuticals
+"AbbVie, Inc.",Health Care,ABBV,0.389950476,0.779900951,0,1,Health Care:-Biotechnology
+"Merck & Co., Inc.",Health Care,MRK,0.365053882,0.498966863,1.229074627,1,Health Care:-Pharmaceuticals
+Abbott Laboratories,Health Care,ABT,0.228931761,0.457863522,0,3,Health Care:-Health Care Equipment and Services
+"Intuitive Surgical, Inc.",Health Care,ISRG,0.182370504,0.364741008,0,5,Health Care:-Health Care Equipment and Services
+Amgen Inc.,Health Care,AMGN,0.176298079,0.352596157,0,1,Health Care:-Biotechnology
+Boston Scientific Corporation,Health Care,BSX,0.155751049,0.311502098,0,4,Health Care:-Health Care Equipment and Services
+Pfizer Inc.,Health Care,PFE,0.154513753,0.309027505,0,1,Health Care:-Pharmaceuticals
+Danaher Corporation,Health Care,DHR,0.14071429,0.28142858,0,4,Health Care:-Pharmaceuticals
+"Gilead Sciences, Inc.",Health Care,GILD,0.137362048,0.274724096,0,1,Health Care:-Biotechnology
+Stryker Corporation,Health Care,SYK,0.133667969,0.267335937,0,4,Health Care:-Health Care Equipment and Services
+Bristol-Myers Squibb Company,Health Care,BMY,0.127580475,0.255160951,0,1,Health Care:-Pharmaceuticals
+Medtronic Plc,Health Care,MDT,0.121796251,0.243592502,0,2,Health Care:-Health Care Equipment and Services
+"Elevance Health, Inc.",Health Care,ELV,0.104865791,0.209731582,0,3,Health Care:-Health Care Equipment and Services
+Cigna Group,Health Care,CI,0.093075368,0.186150736,0,2,Health Care:-Health Care Equipment and Services
+CVS Health Corporation,Health Care,CVS,0.089934599,0.179869197,0,2,Health Care:-Health Care Equipment and Services
+McKesson Corporation,Health Care,MCK,0.088066383,0.176132766,0,4,Health Care:-Health Care Equipment and Services
+"Zoetis, Inc. Class A",Health Care,ZTS,0.076625562,0.153251125,0,2,Health Care:-Pharmaceuticals
+"Becton, Dickinson and Company",Health Care,BDX,0.069759239,0.139518478,0,4,Health Care:-Health Care Equipment and Services
+"Cencora, Inc.",Health Care,COR,0.048906457,0.097812915,0,4,Health Care:-Health Care Equipment and Services
+Edwards Lifesciences Corporation,Health Care,EW,0.043560771,0.087121543,0,4,Health Care:-Health Care Equipment and Services
+GE Healthcare Technologies Inc.,Health Care,GEHC,0.038908506,0.077817011,0,4,Health Care:-Health Care Equipment and Services
+"Agilent Technologies, Inc.",Health Care,A,0.035979763,0.071959527,0,4,Health Care:-Health Care Equipment and Services
+ResMed Inc.,Health Care,RMD,0.033797213,0.067594426,0,2,Health Care:-Health Care Equipment and Services
+Eli Lilly and Company,Health Care,LLY,0.033594331,1.382307654,1.315118992,5,Health Care:-Pharmaceuticals
+"Cardinal Health, Inc.",Health Care,CAH,0.033525982,0.067051964,0,2,Health Care:-Health Care Equipment and Services
+Humana Inc.,Health Care,HUM,0.033445216,0.066890433,0,2,Health Care:-Health Care Equipment and Services
+IQVIA Holdings Inc,Health Care,IQV,0.033066647,0.066133293,0,4,Health Care:-Pharmaceuticals
+Centene Corporation,Health Care,CNC,0.031329233,0.062658466,0,1,Health Care:-Health Care Equipment and Services
+"DexCom, Inc.",Health Care,DXCM,0.030548027,0.061096053,0,5,Health Care:-Health Care Equipment and Services
+Mettler-Toledo International Inc.,Health Care,MTD,0.02637199,0.052743979,0,1,Health Care:-Pharmaceuticals
+STERIS plc,Health Care,STE,0.023175385,0.04635077,0,5,Health Care:-Health Care Equipment and Services
+"Zimmer Biomet Holdings, Inc.",Health Care,ZBH,0.0231577,0.0463154,0,3,Health Care:-Health Care Equipment and Services
+Waters Corporation,Health Care,WAT,0.022454889,0.044909778,0,2,Health Care:-Pharmaceuticals
+Biogen Inc.,Health Care,BIIB,0.021438878,0.042877757,0,1,Health Care:-Biotechnology
+Labcorp Holdings Inc.,Health Care,LH,0.020533339,0.041066677,0,2,Health Care:-Health Care Equipment and Services
+Insulet Corporation,Health Care,PODD,0.019377883,0.038755766,0,5,Health Care:-Health Care Equipment and Services
+Quest Diagnostics Incorporated,Health Care,DGX,0.019339029,0.038678057,0,4,Health Care:-Health Care Equipment and Services
+"Molina Healthcare, Inc.",Health Care,MOH,0.018764283,0.037528566,0,3,Health Care:-Health Care Equipment and Services
+Baxter International Inc.,Health Care,BAX,0.017772973,0.035545946,0,5,Health Care:-Health Care Equipment and Services
+"West Pharmaceutical Services, Inc.",Health Care,WST,0.017153993,0.034307986,0,5,Health Care:-Pharmaceuticals
+"Cooper Companies, Inc.",Health Care,COO,0.016666668,0.033333336,0,5,Health Care:-Health Care Equipment and Services
+"Hologic, Inc.",Health Care,HOLX,0.014746214,0.029492427,0,1,Health Care:-Health Care Equipment and Services
+"Revvity, Inc.",Health Care,RVTY,0.013561341,0.027122681,0,4,Health Care:-Pharmaceuticals
+"Align Technology, Inc.",Health Care,ALGN,0.012336114,0.024672228,0,2,Health Care:-Health Care Equipment and Services
+"Viatris, Inc.",Health Care,VTRS,0.011733955,0.02346791,0,2,Health Care:-Pharmaceuticals
+"Moderna, Inc.",Health Care,MRNA,0.011433141,0.022866282,0,5,Health Care:-Biotechnology
+"Universal Health Services, Inc. Class B",Health Care,UHS,0.010920606,0.021841211,0,1,Health Care:-Health Care Equipment and Services
+Solventum Corporation,Health Care,SOLV,0.010782874,0.021565748,0,3,Health Care:-Health Care Equipment and Services
+Incyte Corporation,Health Care,INCY,0.010085462,0.020170924,0,1,Health Care:-Biotechnology
+Bio-Techne Corporation,Health Care,TECH,0.009974293,0.019948585,0,5,Health Care:-Pharmaceuticals
+"Henry Schein, Inc.",Health Care,HSIC,0.009145433,0.018290865,0,3,Health Care:-Health Care Equipment and Services
+"Charles River Laboratories International, Inc.",Health Care,CRL,0.008806014,0.017612028,0,5,Health Care:-Pharmaceuticals
+DaVita Inc.,Health Care,DVA,0.006995245,0.01399049,0,2,Health Care:-Health Care Equipment and Services
+Teleflex Incorporated,Health Care,TFX,0.006749754,0.013499509,0,3,Health Care:-Health Care Equipment and Services
+"Waste Management, Inc.",Industrials,WM,1.164328258,0.172564185,2.501220701,5,Consumer Cyclicals-Commercial Services and Supplies
+"Automatic Data Processing, Inc.",Industrials,ADP,1.136300311,0.252390733,2.524991355,2,Technology:-Technology Software and Services
+Honeywell International Inc.,Industrials,HON,1.112181695,0.285527789,2.50989118,4,Consumer Cyclicals-Capital Equipment
+"Builders FirstSource, Inc.",Industrials,BLDR,0.631462711,0.030845148,1.29377057,2,Consumer Cyclicals-Capital Equipment
+Deere & Company,Industrials,DE,0.501851838,0.252729593,1.256433268,4,Consumer Cyclicals-Capital Equipment
+GE Aerospace,Industrials,GE,0.229770827,0.459541654,0,2,Consumer Cyclicals-Capital Equipment
+RTX Corporation,Industrials,RTX,0.186331472,0.372662943,0,4,Consumer Cyclicals-Capital Equipment
+Caterpillar Inc.,Industrials,CAT,0.169007498,0.338014995,0,2,Consumer Cyclicals-Capital Equipment
+"Uber Technologies, Inc.",Industrials,UBER,0.162985596,0.325971193,0,4,Industrial Commodities-Transports
+Union Pacific Corporation,Industrials,UNP,0.14818624,0.296372479,0,2,Industrial Commodities-Transports
+Boeing Company,Industrials,BA,0.134509424,0.269018847,0,5,Consumer Cyclicals-Capital Equipment
+Eaton Corp. Plc,Industrials,ETN,0.121597594,0.243195188,0,4,Consumer Cyclicals-Capital Equipment
+Lockheed Martin Corporation,Industrials,LMT,0.102513279,0.205026557,0,3,Consumer Cyclicals-Capital Equipment
+GE Vernova Inc.,Industrials,GEV,0.096670105,0.19334021,0,3,Consumer Cyclicals-Capital Equipment
+"United Parcel Service, Inc. Class B",Industrials,UPS,0.089061315,0.178122629,0,2,Industrial Commodities-Transports
+3M Company,Industrials,MMM,0.085766893,0.171533786,0,3,Consumer Cyclicals-Capital Equipment
+Parker-Hannifin Corporation,Industrials,PH,0.083728318,0.167456636,0,2,Consumer Cyclicals-Capital Equipment
+Trane Technologies plc,Industrials,TT,0.081829156,0.163658311,0,3,Consumer Cyclicals-Capital Equipment
+TransDigm Group Incorporated,Industrials,TDG,0.079661768,0.159323536,0,4,Consumer Cyclicals-Capital Equipment
+General Dynamics Corporation,Industrials,GD,0.071375728,0.142751456,0,4,Consumer Cyclicals-Capital Equipment
+Illinois Tool Works Inc.,Industrials,ITW,0.070880666,0.141761332,0,1,Consumer Cyclicals-Capital Equipment
+Northrop Grumman Corp.,Industrials,NOC,0.069747592,0.139495184,0,3,Consumer Cyclicals-Capital Equipment
+Cintas Corporation,Industrials,CTAS,0.069391443,0.138782885,0,2,Consumer Cyclicals-Commercial Services and Supplies
+Emerson Electric Co.,Industrials,EMR,0.066362087,0.132724173,0,1,Consumer Cyclicals-Capital Equipment
+CSX Corporation,Industrials,CSX,0.060188764,0.120377528,0,3,Industrial Commodities-Transports
+Johnson Controls International plc,Industrials,JCI,0.057835538,0.115671075,0,4,Consumer Cyclicals-Capital Equipment
+Carrier Global Corp.,Industrials,CARR,0.057696544,0.115393088,0,5,Consumer Cyclicals-Capital Equipment
+FedEx Corporation,Industrials,FDX,0.057607422,0.115214844,0,2,Industrial Commodities-Transports
+Howmet Aerospace Inc.,Industrials,HWM,0.055686037,0.111372074,0,4,Consumer Cyclicals-Capital Equipment
+Norfolk Southern Corporation,Industrials,NSC,0.054998181,0.109996363,0,4,Industrial Commodities-Transports
+PACCAR Inc,Industrials,PCAR,0.053677006,0.107354011,0,3,Consumer Cyclicals-Capital Equipment
+"Republic Services, Inc.",Industrials,RSG,0.049772401,0.099544801,0,2,Consumer Cyclicals-Commercial Services and Supplies
+"Copart, Inc.",Industrials,CPRT,0.049144942,0.098289884,0,3,Consumer Cyclicals-Commercial Services and Supplies
+"Paychex, Inc.",Industrials,PAYX,0.048435769,0.096871539,0,2,Technology:-Technology Software and Services
+Cummins Inc.,Industrials,CMI,0.046471113,0.092942226,0,2,Consumer Cyclicals-Capital Equipment
+Fastenal Company,Industrials,FAST,0.045042581,0.090085162,0,4,Consumer Cyclicals-Capital Equipment
+"W.W. Grainger, Inc.",Industrials,GWW,0.044916063,0.089832126,0,4,Consumer Cyclicals-Capital Equipment
+"United Rentals, Inc.",Industrials,URI,0.043086307,0.086172614,0,4,Consumer Cyclicals-Capital Equipment
+Otis Worldwide Corporation,Industrials,OTIS,0.042373072,0.084746143,0,2,Consumer Cyclicals-Capital Equipment
+"AMETEK, Inc.",Industrials,AME,0.042361854,0.084723709,0,2,Consumer Cyclicals-Capital Equipment
+"Verisk Analytics, Inc.",Industrials,VRSK,0.042288448,0.084576895,0,2,Consumer Cyclicals-Commercial Services and Supplies
+Axon Enterprise Inc,Industrials,AXON,0.042117099,0.084234198,0,5,Consumer Cyclicals-Capital Equipment
+"Quanta Services, Inc.",Industrials,PWR,0.041666185,0.08333237,0,5,Consumer Cyclicals-Capital Equipment
+L3Harris Technologies Inc,Industrials,LHX,0.041436653,0.082873306,0,4,Consumer Cyclicals-Capital Equipment
+Ingersoll Rand Inc.,Industrials,IR,0.034267503,0.068535006,0,4,Consumer Cyclicals-Capital Equipment
+Westinghouse Air Brake Technologies Corporation,Industrials,WAB,0.033187372,0.066374743,0,2,Consumer Cyclicals-Capital Equipment
+"Old Dominion Freight Line, Inc.",Industrials,ODFL,0.031519001,0.063038001,0,4,Industrial Commodities-Transports
+Equifax Inc.,Industrials,EFX,0.031414666,0.062829332,0,5,Consumer Cyclicals-Commercial Services and Supplies
+"Delta Air Lines, Inc.",Industrials,DAL,0.03133316,0.062666319,0,3,Industrial Commodities-Transports
+"Rockwell Automation, Inc.",Industrials,ROK,0.030333209,0.060666418,0,4,Consumer Cyclicals-Capital Equipment
+Xylem Inc.,Industrials,XYL,0.030303407,0.060606814,0,5,Consumer Cyclicals-Capital Equipment
+"Broadridge Financial Solutions, Inc.",Industrials,BR,0.028459088,0.056918177,0,3,Technology:-Technology Software and Services
+Fortive Corp.,Industrials,FTV,0.026965587,0.053931174,0,1,Consumer Cyclicals-Capital Equipment
+Dover Corporation,Industrials,DOV,0.025890939,0.051781878,0,2,Consumer Cyclicals-Capital Equipment
+"United Airlines Holdings, Inc.",Industrials,UAL,0.025356584,0.050713168,0,1,Industrial Commodities-Transports
+Veralto Corporation,Industrials,VLTO,0.025272027,0.050544053,0,3,Consumer Cyclicals-Commercial Services and Supplies
+Southwest Airlines Co.,Industrials,LUV,0.02132552,0.04265104,0,3,Industrial Commodities-Transports
+Lennox International Inc.,Industrials,LII,0.019354513,0.038709026,0,2,Consumer Cyclicals-Capital Equipment
+Hubbell Incorporated,Industrials,HUBB,0.018943982,0.037887963,0,3,Consumer Cyclicals-Capital Equipment
+"Leidos Holdings, Inc.",Industrials,LDOS,0.018725241,0.037450481,0,3,Consumer Cyclicals-Commercial Services and Supplies
+Snap-on Incorporated,Industrials,SNA,0.01802319,0.036046381,0,1,Consumer Cyclicals-Capital Equipment
+"Expeditors International of Washington, Inc.",Industrials,EXPD,0.01686089,0.03372178,0,1,Industrial Commodities-Transports
+Masco Corporation,Industrials,MAS,0.015812792,0.031625584,0,1,Consumer Cyclicals-Capital Equipment
+Jacobs Solutions Inc.,Industrials,J,0.015772399,0.031544798,0,4,Consumer Cyclicals-Commercial Services and Supplies
+Pentair plc,Industrials,PNR,0.015193034,0.030386067,0,2,Consumer Cyclicals-Capital Equipment
+"Rollins, Inc.",Industrials,ROL,0.015116361,0.030232723,0,3,Consumer Cyclicals-Commercial Services and Supplies
+IDEX Corporation,Industrials,IEX,0.01447957,0.028959139,0,3,Consumer Cyclicals-Capital Equipment
+Textron Inc.,Industrials,TXT,0.014199117,0.028398233,0,2,Consumer Cyclicals-Capital Equipment
+"Stanley Black & Decker, Inc.",Industrials,SWK,0.012931651,0.025863303,0,4,Consumer Cyclicals-Capital Equipment
+"J.B. Hunt Transport Services, Inc.",Industrials,JBHT,0.012229191,0.024458383,0,3,Industrial Commodities-Transports
+"C.H. Robinson Worldwide, Inc.",Industrials,CHRW,0.012213026,0.024426051,0,2,Industrial Commodities-Transports
+Nordson Corporation,Industrials,NDSN,0.011630398,0.023260796,0,4,Consumer Cyclicals-Capital Equipment
+Allegion Public Limited Company,Industrials,ALLE,0.011555639,0.023111279,0,2,Consumer Cyclicals-Capital Equipment
+"Paycom Software, Inc.",Industrials,PAYC,0.010339817,0.020679634,0,2,Consumer Cyclicals-Commercial Services and Supplies
+"Dayforce, Inc.",Industrials,DAY,0.009461211,0.018922422,0,5,Consumer Cyclicals-Commercial Services and Supplies
+A. O. Smith Corporation,Industrials,AOS,0.008270941,0.016541882,0,3,Consumer Cyclicals-Capital Equipment
+Generac Holdings Inc.,Industrials,GNRC,0.008257036,0.016514073,0,3,Consumer Cyclicals-Capital Equipment
+"Huntington Ingalls Industries, Inc.",Industrials,HII,0.008209269,0.016418537,0,5,Consumer Cyclicals-Capital Equipment
+"Palo Alto Networks, Inc.",Information Technology,PANW,1.158090946,0.250762956,2.566944848,3,Technology:-Technology Software and Services
+NVIDIA Corporation,Information Technology,NVDA,1.136420782,6.053914998,3.781073434,3,Technology:-Semiconductors
+Accenture Plc Class A,Information Technology,ACN,0.963752163,0.391506558,2.319010884,3,Technology:-Technology Software and Services
+Apple Inc.,Information Technology,AAPL,0.862892083,6.738429575,5.012645409,2,Technology:-Technology Hardware
+ASML Holding NV Sponsored ADR,Information Technology,ASML,0.64448549,0,1.288970979,4,Technology:-Semiconductors
+"Autodesk, Inc.",Information Technology,ADSK,0.606284993,0.119884112,1.332454098,1,Technology:-Technology Software and Services
+"Motorola Solutions, Inc.",Information Technology,MSI,0.544455,0.146926002,1.235836001,3,Technology:-Technology Hardware
+"Gartner, Inc.",Information Technology,IT,0.538303088,0.067253285,1.14385946,2,Technology:-Technology Software and Services
+Microsoft Corporation,Information Technology,MSFT,0.484707293,5.988471155,5.019056569,4,Technology:-Technology Software and Services
+QUALCOMM Incorporated,Information Technology,QCOM,0.456767705,0.36536521,1.278900619,1,Technology:-Semiconductors
+"Salesforce, Inc.",Information Technology,CRM,0.348349668,0.555426007,1.252125343,2,Technology:-Technology Software and Services
+Broadcom Inc.,Information Technology,AVGO,0.31309004,1.852967098,1.226787018,2,Technology:-Semiconductors
+Oracle Corporation,Information Technology,ORCL,0.255539585,0.51107917,0,5,Technology:-Technology Software and Services
+"Cisco Systems, Inc.",Information Technology,CSCO,0.251562966,0.503125932,0,1,Technology:-Technology Hardware
+International Business Machines Corporation,Information Technology,IBM,0.234231377,0.468462754,0,1,Technology:-Technology Software and Services
+Palantir Technologies Inc. Class A,Information Technology,PLTR,0.186482182,0.372964363,0,1,Technology:-Technology Software and Services
+"Advanced Micro Devices, Inc.",Information Technology,AMD,0.181001972,0.362003945,0,5,Technology:-Semiconductors
+Adobe Inc.,Information Technology,ADBE,0.178541334,0.357082669,0,1,Technology:-Technology Software and Services
+"ServiceNow, Inc.",Information Technology,NOW,0.176736927,0.353473854,0,4,Technology:-Technology Software and Services
+Intuit Inc.,Information Technology,INTU,0.175203609,0.350407217,0,1,Technology:-Technology Software and Services
+Texas Instruments Incorporated,Information Technology,TXN,0.171583487,0.343166973,0,5,Technology:-Semiconductors
+"Applied Materials, Inc.",Information Technology,AMAT,0.13249735,0.264994699,0,3,Technology:-Semiconductors
+"Micron Technology, Inc.",Information Technology,MU,0.118894913,0.237789826,0,5,Technology:-Semiconductors
+Intel Corporation,Information Technology,INTC,0.107588422,0.215176843,0,5,Technology:-Semiconductors
+"Analog Devices, Inc.",Information Technology,ADI,0.106432217,0.212864435,0,4,Technology:-Semiconductors
+Lam Research Corporation,Information Technology,LRCX,0.103883576,0.207767153,0,2,Technology:-Semiconductors
+KLA Corporation,Information Technology,KLAC,0.099772048,0.199544097,0,1,Technology:-Semiconductors
+"CrowdStrike Holdings, Inc. Class A",Information Technology,CRWD,0.089411585,0.17882317,0,5,Technology:-Technology Software and Services
+"Arista Networks, Inc.",Information Technology,ANET,0.089233949,0.178467897,0,2,Technology:-Technology Hardware
+Amphenol Corporation Class A,Information Technology,APH,0.083298348,0.166596696,0,5,Technology:-Technology Hardware
+"Cadence Design Systems, Inc.",Information Technology,CDNS,0.073816351,0.147632703,0,4,Technology:-Technology Software and Services
+"Synopsys, Inc.",Information Technology,SNPS,0.0719575,0.143915,0,5,Technology:-Technology Software and Services
+"Fortinet, Inc.",Information Technology,FTNT,0.065196646,0.130393292,0,1,Technology:-Technology Software and Services
+"Roper Technologies, Inc.",Information Technology,ROP,0.064244506,0.128489011,0,2,Technology:-Technology Software and Services
+"Workday, Inc. Class A",Information Technology,WDAY,0.055544333,0.111088665,0,3,Technology:-Technology Software and Services
+NXP Semiconductors NV,Information Technology,NXPI,0.053611687,0.107223374,0,4,Technology:-Semiconductors
+Fair Isaac Corporation,Information Technology,FICO,0.046983747,0.093967494,0,2,Technology:-Technology Software and Services
+TE Connectivity plc,Information Technology,TEL,0.045551515,0.091103031,0,2,Technology:-Technology Hardware
+Cognizant Technology Solutions Corporation Class A,Information Technology,CTSH,0.039850967,0.079701935,0,2,Technology:-Technology Software and Services
+Corning Inc,Information Technology,GLW,0.039041563,0.078083126,0,3,Technology:-Technology Hardware
+"Dell Technologies, Inc. Class C",Information Technology,DELL,0.031638635,0.06327727,0,5,Technology:-Technology Hardware
+"Monolithic Power Systems, Inc.",Information Technology,MPWR,0.030921755,0.06184351,0,5,Technology:-Semiconductors
+"ANSYS, Inc.",Information Technology,ANSS,0.029559674,0.059119347,0,2,Technology:-Technology Software and Services
+HP Inc.,Information Technology,HPQ,0.028599255,0.05719851,0,2,Technology:-Technology Hardware
+Microchip Technology Incorporated,Information Technology,MCHP,0.028517337,0.057034675,0,5,Technology:-Semiconductors
+Keysight Technologies Inc,Information Technology,KEYS,0.028023243,0.056046486,0,2,Technology:-Technology Hardware
+"GoDaddy, Inc. Class A",Information Technology,GDDY,0.026410021,0.052820042,0,1,Technology:-Technology Software and Services
+"Tyler Technologies, Inc.",Information Technology,TYL,0.025360024,0.050720047,0,3,Technology:-Technology Software and Services
+Teledyne Technologies Incorporated,Information Technology,TDY,0.024233024,0.048466049,0,2,Technology:-Technology Hardware
+CDW Corporation,Information Technology,CDW,0.023321815,0.046643629,0,5,Technology:-Technology Hardware
+Hewlett Packard Enterprise Co.,Information Technology,HPE,0.021942695,0.04388539,0,3,Technology:-Technology Hardware
+"VeriSign, Inc.",Information Technology,VRSN,0.020839753,0.041679506,0,1,Technology:-Technology Software and Services
+"Super Micro Computer, Inc.",Information Technology,SMCI,0.020498155,0.040996309,0,5,Technology:-Technology Hardware
+PTC Inc.,Information Technology,PTC,0.02000272,0.04000544,0,3,Technology:-Technology Software and Services
+"NetApp, Inc.",Information Technology,NTAP,0.019641339,0.039282678,0,3,Technology:-Technology Hardware
+Seagate Technology Holdings PLC,Information Technology,STX,0.019454912,0.038909823,0,4,Technology:-Technology Hardware
+ON Semiconductor Corporation,Information Technology,ON,0.019149741,0.038299482,0,3,Technology:-Semiconductors
+Trimble Inc.,Information Technology,TRMB,0.017966888,0.035933776,0,2,Technology:-Technology Hardware
+Jabil Inc.,Information Technology,JBL,0.016901456,0.033802911,0,2,Technology:-Technology Hardware
+"F5, Inc.",Information Technology,FFIV,0.016246347,0.032492693,0,1,Technology:-Technology Hardware
+Western Digital Corporation,Information Technology,WDC,0.016013491,0.032026982,0,5,Technology:-Technology Hardware
+Gen Digital Inc.,Information Technology,GEN,0.015559018,0.031118036,0,1,Technology:-Technology Software and Services
+Zebra Technologies Corporation Class A,Information Technology,ZBRA,0.015301932,0.030603865,0,3,Technology:-Technology Hardware
+"Teradyne, Inc.",Information Technology,TER,0.014945112,0.029890224,0,5,Technology:-Semiconductors
+"First Solar, Inc.",Information Technology,FSLR,0.014320668,0.028641335,0,5,Technology:-Semiconductors
+"Akamai Technologies, Inc.",Information Technology,AKAM,0.012747429,0.025494859,0,3,Technology:-Technology Software and Services
+"Juniper Networks, Inc.",Information Technology,JNPR,0.012457642,0.024915285,0,2,Technology:-Technology Hardware
+"Skyworks Solutions, Inc.",Information Technology,SWKS,0.011378057,0.022756114,0,1,Technology:-Semiconductors
+"EPAM Systems, Inc.",Information Technology,EPAM,0.010172495,0.02034499,0,3,Technology:-Technology Software and Services
+"Enphase Energy, Inc.",Information Technology,ENPH,0.00868103,0.01736206,0,3,Technology:-Semiconductors
+SanDisk Corp,Information Technology,SNDK,2.11003E-09,4.22007E-09,0,3,Technology:-Semiconductors
+CRH public limited company,Materials,CRH,0.633090852,0,1.266181704,2,Industrial Commodities-Industrial Commodities
+Linde plc,Materials,LIN,0.398244726,0.453842873,1.250332325,3,Industrial Commodities-Industrial Commodities
+Sherwin-Williams Company,Materials,SHW,0.081068132,0.162136263,0,4,Industrial Commodities-Industrial Commodities
+"Air Products and Chemicals, Inc.",Materials,APD,0.067803819,0.135607638,0,5,Industrial Commodities-Industrial Commodities
+Ecolab Inc.,Materials,ECL,0.066098437,0.132196874,0,3,Industrial Commodities-Industrial Commodities
+"Freeport-McMoRan, Inc.",Materials,FCX,0.060877255,0.12175451,0,4,Industrial Commodities-Industrial Commodities
+Newmont Corporation,Materials,NEM,0.056604268,0.113208537,0,4,Industrial Commodities-Industrial Commodities
+Corteva Inc,Materials,CTVA,0.044236274,0.088472549,0,2,Industrial Commodities-Industrial Commodities
+"DuPont de Nemours, Inc.",Materials,DD,0.033480944,0.066961888,0,2,Industrial Commodities-Industrial Commodities
+Vulcan Materials Company,Materials,VMC,0.032826514,0.065653028,0,4,Industrial Commodities-Industrial Commodities
+Nucor Corporation,Materials,NUE,0.031652026,0.063304052,0,3,Industrial Commodities-Industrial Commodities
+"Martin Marietta Materials, Inc.",Materials,MLM,0.030778778,0.061557557,0,5,Industrial Commodities-Industrial Commodities
+International Paper Company,Materials,IP,0.028558666,0.057117332,0,3,Industrial Commodities-Industrial Commodities
+"PPG Industries, Inc.",Materials,PPG,0.026871625,0.05374325,0,3,Industrial Commodities-Industrial Commodities
+"Dow, Inc.",Materials,DOW,0.026682425,0.053364849,0,4,Industrial Commodities-Industrial Commodities
+Smurfit Westrock PLC,Materials,SW,0.02351838,0.04703676,0,4,Industrial Commodities-Industrial Commodities
+International Flavors & Fragrances Inc.,Materials,IFF,0.021232181,0.042464361,0,5,Industrial Commodities-Industrial Commodities
+LyondellBasell Industries NV,Materials,LYB,0.019652719,0.039305438,0,2,Industrial Commodities-Industrial Commodities
+"Steel Dynamics, Inc.",Materials,STLD,0.018663816,0.037327632,0,2,Industrial Commodities-Industrial Commodities
+Packaging Corporation of America,Materials,PKG,0.01831132,0.036622639,0,3,Industrial Commodities-Industrial Commodities
+Ball Corporation,Materials,BALL,0.016027694,0.032055388,0,4,Industrial Commodities-Industrial Commodities
+Avery Dennison Corporation,Materials,AVY,0.014802428,0.029604855,0,2,Industrial Commodities-Industrial Commodities
+Amcor PLC,Materials,AMCR,0.014624674,0.029249348,0,1,Industrial Commodities-Industrial Commodities
+"CF Industries Holdings, Inc.",Materials,CF,0.013938782,0.027877564,0,1,Industrial Commodities-Industrial Commodities
+Eastman Chemical Company,Materials,EMN,0.010837578,0.021675155,0,1,Industrial Commodities-Industrial Commodities
+Albemarle Corporation,Materials,ALB,0.009421165,0.01884233,0,5,Industrial Commodities-Industrial Commodities
+Mosaic Company,Materials,MOS,0.009383634,0.018767268,0,1,Industrial Commodities-Industrial Commodities
+Celanese Corporation,Materials,CE,0.006462895,0.012925789,0,2,Industrial Commodities-Industrial Commodities
+FMC Corporation,Materials,FMC,0.005487229,0.010974458,0,1,Industrial Commodities-Industrial Commodities
+American Tower Corporation,Real Estate,AMT,1.160355619,0.208504147,2.529215385,5,Financials:-Real Estate
+"Prologis, Inc.",Real Estate,PLD,0.10806192,0.21612384,0,4,Financials:-Real Estate
+Welltower Inc.,Real Estate,WELL,0.091082912,0.182165825,0,5,Financials:-Real Estate
+"Equinix, Inc.",Real Estate,EQIX,0.085557456,0.171114911,0,4,Financials:-Real Estate
+"Simon Property Group, Inc.",Real Estate,SPG,0.052516274,0.105032549,0,3,Financials:-Real Estate
+Realty Income Corporation,Real Estate,O,0.051430706,0.102861411,0,5,Financials:-Real Estate
+"Digital Realty Trust, Inc.",Real Estate,DLR,0.049159453,0.098318906,0,5,Financials:-Real Estate
+Public Storage,Real Estate,PSA,0.048651815,0.09730363,0,3,Financials:-Real Estate
+Crown Castle Inc.,Real Estate,CCI,0.047314034,0.094628068,0,4,Financials:-Real Estate
+"CBRE Group, Inc. Class A",Real Estate,CBRE,0.040739722,0.081479445,0,1,Financials:-Real Estate
+"CoStar Group, Inc.",Real Estate,CSGP,0.033726305,0.067452609,0,4,Financials:-Real Estate
+VICI Properties Inc,Real Estate,VICI,0.032899935,0.065799869,0,1,Financials:-Real Estate
+Extra Space Storage Inc.,Real Estate,EXR,0.032182163,0.064364326,0,4,Financials:-Real Estate
+"AvalonBay Communities, Inc.",Real Estate,AVB,0.0312666,0.062533199,0,3,Financials:-Real Estate
+"Ventas, Inc.",Real Estate,VTR,0.029572475,0.059144949,0,5,Financials:-Real Estate
+"Iron Mountain, Inc.",Real Estate,IRM,0.027012989,0.054025979,0,3,Financials:-Real Estate
+Equity Residential,Real Estate,EQR,0.024948124,0.049896248,0,3,Financials:-Real Estate
+SBA Communications Corp. Class A,Real Estate,SBAC,0.024739221,0.049478443,0,3,Financials:-Real Estate
+Weyerhaeuser Company,Real Estate,WY,0.02276687,0.045533739,0,3,Financials:-Real Estate
+"Essex Property Trust, Inc.",Real Estate,ESS,0.020199934,0.040399868,0,3,Financials:-Real Estate
+"Invitation Homes, Inc.",Real Estate,INVH,0.020189266,0.040378533,0,4,Financials:-Real Estate
+"Mid-America Apartment Communities, Inc.",Real Estate,MAA,0.019780983,0.039561966,0,3,Financials:-Real Estate
+"Alexandria Real Estate Equities, Inc.",Real Estate,ARE,0.015707815,0.03141563,0,5,Financials:-Real Estate
+"Healthpeak Properties, Inc.",Real Estate,DOC,0.014825139,0.029650278,0,4,Financials:-Real Estate
+Kimco Realty Corporation,Real Estate,KIM,0.014673398,0.029346797,0,2,Financials:-Real Estate
+"UDR, Inc.",Real Estate,UDR,0.01364449,0.027288979,0,4,Financials:-Real Estate
+Camden Property Trust,Real Estate,CPT,0.013340299,0.026680598,0,3,Financials:-Real Estate
+Regency Centers Corporation,Real Estate,REG,0.01224114,0.02448228,0,2,Financials:-Real Estate
+"Host Hotels & Resorts, Inc.",Real Estate,HST,0.010880937,0.021761875,0,2,Financials:-Real Estate
+BXP Inc,Real Estate,BXP,0.010369839,0.020739678,0,3,Financials:-Real Estate
+Federal Realty Investment Trust,Real Estate,FRT,0.007752634,0.015505269,0,3,Financials:-Real Estate
+Millrose Properties Inc Class A,Real Estate,MRP,6.01947E-08,1.20389E-07,0,4,Financials:-Real Estate
+Xcel Energy Inc.,Utilities,XEL,0.58372915,0.083797848,1.251256149,5,Utilities-Utilities
+"NextEra Energy, Inc.",Utilities,NEE,0.448061438,0.304647825,1.200770701,5,Utilities-Utilities
+Southern Company,Utilities,SO,0.102640752,0.205281504,0,4,Utilities-Utilities
+Duke Energy Corporation,Utilities,DUK,0.096625826,0.193251652,0,4,Utilities-Utilities
+Constellation Energy Corporation,Utilities,CEG,0.071459129,0.142918257,0,5,Utilities-Utilities
+"American Electric Power Company, Inc.",Utilities,AEP,0.058882079,0.117764157,0,3,Utilities-Utilities
+Dominion Energy Inc,Utilities,D,0.048088378,0.096176756,0,5,Utilities-Utilities
+Vistra Corp.,Utilities,VST,0.046712518,0.093425037,0,2,Utilities-Utilities
+Exelon Corporation,Utilities,EXC,0.046642955,0.093285911,0,2,Utilities-Utilities
+Sempra,Utilities,SRE,0.046155249,0.092310498,0,5,Utilities-Utilities
+Public Service Enterprise Group Inc,Utilities,PEG,0.043198228,0.086396455,0,5,Utilities-Utilities
+PG&E Corporation,Utilities,PCG,0.039153578,0.078307155,0,2,Utilities-Utilities
+"Consolidated Edison, Inc.",Utilities,ED,0.039122897,0.078245794,0,4,Utilities-Utilities
+Entergy Corporation,Utilities,ETR,0.037795176,0.075590352,0,3,Utilities-Utilities
+WEC Energy Group Inc,Utilities,WEC,0.035506415,0.071012831,0,3,Utilities-Utilities
+DTE Energy Company,Utilities,DTE,0.029525969,0.059051939,0,4,Utilities-Utilities
+"American Water Works Company, Inc.",Utilities,AWK,0.028760504,0.057521007,0,5,Utilities-Utilities
+Ameren Corporation,Utilities,AEE,0.027775426,0.055550852,0,4,Utilities-Utilities
+PPL Corporation,Utilities,PPL,0.026878443,0.053756885,0,4,Utilities-Utilities
+"CenterPoint Energy, Inc.",Utilities,CNP,0.024389248,0.048778495,0,5,Utilities-Utilities
+Atmos Energy Corporation,Utilities,ATO,0.024382237,0.048764474,0,5,Utilities-Utilities
+Edison International,Utilities,EIX,0.02376244,0.04752488,0,1,Utilities-Utilities
+Eversource Energy,Utilities,ES,0.023490684,0.046981368,0,4,Utilities-Utilities
+CMS Energy Corporation,Utilities,CMS,0.022917847,0.045835693,0,4,Utilities-Utilities
+FirstEnergy Corp.,Utilities,FE,0.021248767,0.042497534,0,4,Utilities-Utilities
+"NRG Energy, Inc.",Utilities,NRG,0.021008947,0.042017894,0,1,Utilities-Utilities
+NiSource Inc,Utilities,NI,0.019231458,0.038462916,0,4,Utilities-Utilities
+Alliant Energy Corporation,Utilities,LNT,0.016966185,0.03393237,0,4,Utilities-Utilities
+"Evergy, Inc.",Utilities,EVRG,0.016272719,0.032545438,0,2,Utilities-Utilities
+Pinnacle West Capital Corporation,Utilities,PNW,0.011158781,0.022317561,0,4,Utilities-Utilities
+AES Corporation,Utilities,AES,0.009744741,0.019489483,0,3,Utilities-Utilities
