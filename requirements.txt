@@ -1,11 +1,25 @@
 # Core requirements for Active Share Optimizer
-streamlit
-pandas
-numpy
-pulp
-openpyxl
-et_xmlfile
-python-dateutil
-pytz
-six
-tzdata
+streamlit>=1.30.0     # For the web app UI
+pandas>=2.0.0         # Data manipulation and Excel/CSV I/O
+numpy>=1.24.0         # Numerical operations
+pulp>=2.7.0           # Linear programming optimization
+
+# For Excel file handling
+openpyxl>=3.1.0       # Excel file I/O (xlsx)
+
+# Additional dependencies
+matplotlib>=3.7.0     # For plotting (if needed)
+scipy>=1.10.0         # Scientific computing library
+
+# CBC Solver Installation Instructions:
+# On Mac: brew install cbc
+# On Windows: Download binary from https://github.com/coin-or/Cbc/releases
+# On Linux: apt-get install coinor-cbc (or equivalent for your distro)
+# Or via conda (any OS): conda install -c conda-forge coincbc
+
+# The following are dependencies of the above packages, but pip will usually handle them automatically:
+# et_xmlfile - for openpyxl
+# python-dateutil - for pandas
+# pytz - for pandas
+# six - common dependency
+# tzdata - timezone data

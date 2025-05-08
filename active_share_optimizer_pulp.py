@@ -16,8 +16,8 @@ This version uses PuLP for more systematic optimization compared to the heuristi
 import pandas as pd
 import numpy as np
 from collections import defaultdict
-import math
 import pulp
+from pulp import COIN_CMD
 import os
 
 def load_portfolio_data(file_path):
@@ -129,7 +129,7 @@ def load_constraints(file_path):
 
 def optimize_portfolio_pulp(stocks_data, original_active_share, max_positions=60, target_active_share=0.55, 
                             sector_tolerance=0.03, stocks_to_avoid=None, sector_constraints=None, 
-                            min_position=1.0, max_position=5.0, core_rank_limit=3, increment=0.5):
+                            min_position=1.0, max_position=5.0, core_rank_limit=3, increment=0.5, forced_positions=None, time_limit=120):
     """
     Optimize the portfolio to reduce Active Share while applying constraints.
     
@@ -145,6 +145,7 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, max_positions=60
     - max_position: Maximum position size as a percentage (e.g., 5.0)
     - core_rank_limit: Only consider stocks with Core Model rank <= this value (e.g., 1, 2, 3, 4, 5)
     - increment: Allowed increment for position sizes (e.g., 0.5 for 0.5% increments)
+    - forced_positions: Dictionary {ticker: (min, max)}. For each ticker, require it to be in the portfolio with weight between min and max.
     
     Returns:
     - optimized_portfolio: Dictionary of ticker to weight for the optimized portfolio
@@ -156,6 +157,8 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, max_positions=60
         stocks_to_avoid = []
     if sector_constraints is None:
         sector_constraints = {}
+    if forced_positions is None:
+        forced_positions = {}
     
     # Find current portfolio positions (stocks with positive weights)
     portfolio_stocks = stocks_data[stocks_data['Portfolio Weight'] > 0]
@@ -252,6 +255,10 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, max_positions=60
             # Only mark as purchase eligible if it meets criteria
             if ticker not in stocks_to_avoid and stock_info['core_rank'] <= core_rank_limit:
                 purchase_eligible[ticker] = True
+                
+    # Make sure any forced positions are purchase eligible regardless of other criteria
+    for ticker in forced_positions.keys():
+        purchase_eligible[ticker] = True
     
     # Create a dictionary to map tickers to indices in the all_stocks list
     ticker_to_index = {stock['ticker']: i for i, stock in enumerate(all_stocks)}
@@ -284,15 +291,40 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, max_positions=60
         for i in range(len(all_stocks)):
             weight[i] = pulp.LpVariable(f"Weight_{i}", lowBound=0, upBound=max_position, cat=pulp.LpContinuous)
             # If included, weight >= min_position, else weight == 0
-            model += weight[i] >= min_position * include[i]
-            model += weight[i] <= max_position * include[i]
+            model += weight[i] >= min_position * include[i], f"min_weight_{i}"
             # If not included, weight == 0
-            model += weight[i] <= max_position * include[i]
+            model += weight[i] <= max_position * include[i], f"max_weight_{i}"
+        
+        print("Using continuous weights (no increment restriction)")
+        
+        # Forced positions constraints (no increment)
+        for ticker, (minp, maxp) in forced_positions.items():
+            if ticker in ticker_to_index:
+                idx = ticker_to_index[ticker]
+                # Sanity checks
+                if not (isinstance(minp, (int, float)) and isinstance(maxp, (int, float))):
+                    raise ValueError(f"Invalid forced position bounds for {ticker}: {minp}, {maxp}")
+                if minp > maxp:
+                    raise ValueError(f"minp > maxp for {ticker}: {minp} > {maxp}")
+                # Clip to global bounds
+                minp = max(minp, min_position)
+                maxp = min(maxp, max_position)
+                model += include[idx] == 1, f"force_own_{ticker}"
+                if minp > min_position:
+                    model += weight[idx] >= minp, f"minpos_{ticker}"
+                if maxp < max_position:
+                    model += weight[idx] <= maxp, f"maxpos_{ticker}"
+                
+                print(f"Forcing {ticker} to be included with weight between {minp}% and {maxp}% (continuous)")
+                bench_weight = all_stocks[idx]['bench_weight']
+                print(f"Benchmark weight for {ticker}: {bench_weight}%")
     else:
         # Enforce increments using binary variables
-        increments = [round(x, 4) for x in 
-            list(np.arange(min_position, max_position + increment/2, increment))
-            if min_position <= x <= max_position]
+        increments = [round(x, 4) for x in np.arange(min_position, max_position + increment/2, increment)]
+        
+        print(f"Using incremental weights with increment: {increment}%")
+        print(f"Available increments: {min_position}% to {max_position}% in steps of {increment}%")
+        
         increment_bin_vars = {}
         for i in range(len(all_stocks)):
             increment_bin_vars[i] = {}
@@ -302,10 +334,37 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, max_positions=60
             weight[i] = pulp.lpSum([inc * increment_bin_vars[i][inc] for inc in increments])
             # Only allow increments if stock is included
             model += pulp.lpSum([increment_bin_vars[i][inc] for inc in increments]) == include[i]
-            # If not included, all increment_bin_vars are zero
-            # If included, exactly one increment_bin_var is 1 (enforces min/max and discrete increments)
-    # Remove old continuous variable logic and constraints
-    # (min_position is enforced by the increments starting at min_position)
+        # Forced positions constraints (increment case) - only add these ONCE per ticker
+        for ticker, (minp, maxp) in forced_positions.items():
+            if ticker in ticker_to_index:
+                idx = ticker_to_index[ticker]
+                # Sanity checks
+                if not (isinstance(minp, (int, float)) and isinstance(maxp, (int, float))):
+                    raise ValueError(f"Invalid forced position bounds for {ticker}: {minp}, {maxp}")
+                if minp > maxp:
+                    raise ValueError(f"minp > maxp for {ticker}: {minp} > {maxp}")
+                # Clip to global bounds
+                minp = max(minp, min_position)
+                maxp = min(maxp, max_position)
+                # Force the stock to be included
+                model += include[idx] == 1, f"force_own_{ticker}"
+                
+                # Create a list of allowed increments for this ticker
+                allowed_increments = []
+                for inc in increments:
+                    if minp <= inc <= maxp:
+                        allowed_increments.append(inc)
+                    else:
+                        model += increment_bin_vars[idx][inc] == 0, f"force_inc_{ticker}_{inc}"
+                
+                # Ensure exactly one increment is selected for this forced position
+                if allowed_increments:
+                    model += pulp.lpSum([increment_bin_vars[idx][inc] for inc in allowed_increments]) == 1, f"force_sum_inc_{ticker}"
+                    bench_weight = all_stocks[idx]['bench_weight']
+                    print(f"Forcing {ticker} to be included with weight between {minp}% and {maxp}%, allowed increments: {allowed_increments}")
+                    print(f"Benchmark weight for {ticker}: {bench_weight}%")
+                else:
+                    print(f"WARNING: No valid increments found for {ticker} between {minp}% and {maxp}%!")
     
     # Add constraints to ensure only purchase-eligible stocks can be selected
     for i, stock in enumerate(all_stocks):
@@ -349,81 +408,58 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, max_positions=60
     
     # Constraint: Total number of positions must not exceed max_positions
     model += pulp.lpSum(include[i] for i in range(len(all_stocks))) <= max_positions
-    
+
     # Constraint: Filter out stocks in the stocks_to_avoid list
     for ticker in stocks_to_avoid:
-        if ticker in ticker_to_index:
+        if ticker in ticker_to_index and ticker not in forced_positions:
             i = ticker_to_index[ticker]
             model += include[i] == 0
-    
-    # Constraint: Only select stocks with Core Rank <= core_rank_limit
+
+    # Core rank constraint: Only select stocks with Core Rank <= core_rank_limit
     for i in range(len(all_stocks)):
-        if all_stocks[i]['core_rank'] > core_rank_limit:
+        ticker = all_stocks[i]['ticker']
+        if all_stocks[i]['core_rank'] > core_rank_limit and ticker not in forced_positions:
             model += include[i] == 0
-    
-    # Constraint: Sector-and-subsector weights should match the constraints as closely as possible
+
+    # abs_diff constraints for active share
+
+    # Sector-and-subsector weights constraints
     for subsector, target_weight in sector_constraints.items():
         if subsector in subsector_to_stocks:
             subsector_weight = pulp.lpSum(weight[i] for i in subsector_to_stocks[subsector])
             model += subsector_weight >= target_weight - sector_tolerance * 100
             model += subsector_weight <= target_weight + sector_tolerance * 100
+   
+    # Check if the model was solved successfully
     
     # Solve the model
-    print("\nSolving the optimization model...")
-    model.solve()
-    
+    print(f"\nSolving the optimization model (timeout: {time_limit} seconds)...")
+    cbc_path = "/opt/homebrew/bin/cbc"
+    if not os.path.exists(cbc_path):
+        raise RuntimeError("CBC path not found.")
+
+    # Set strict time limit parameters for the solver
+    solver = COIN_CMD(path=cbc_path, msg=True, timeLimit=time_limit, 
+                      options=['sec', str(time_limit), 
+                              'timeMode', 'elapsed', 
+                              'ratioGap', '0.0001',
+                              'maxN', '100000000',
+                              'maxSolutions', '1',
+                              'cuts', 'off'])
+
+    model.solve(solver)
+    print("Solver status:", pulp.LpStatus[model.status])
+
+
     # Check if the model was solved successfully
     if pulp.LpStatus[model.status] != 'Optimal':
         print(f"Model status: {pulp.LpStatus[model.status]}")
-        print("Could not find an optimal solution. Trying with relaxed sector constraints...")
-        
-        # Create a new model with relaxed constraints - relaxing only the sector constraints
-        # but keeping the position size and core rank constraints
-        model = pulp.LpProblem("Portfolio_Optimization_Relaxed", pulp.LpMinimize)
-        
-            # Re-create weight constraints for all stocks in the relaxed model
-        for i in range(len(all_stocks)):
-            model += weight[i] <= max_position * include[i]  # Enforce max position
-            # No minimum position size in relaxed model since min_position is 0
-            
-        # Re-create the abs_diff constraints
-        for i in range(len(all_stocks)):
-            model += abs_diff[i] >= weight[i] - all_stocks[i]['bench_weight']
-            model += abs_diff[i] >= all_stocks[i]['bench_weight'] - weight[i]
-            
-            # Core rank constraint
-            if all_stocks[i]['core_rank'] > core_rank_limit:
-                model += include[i] == 0
-                
-            # Stocks to avoid constraint
-            if all_stocks[i]['ticker'] in stocks_to_avoid:
-                model += include[i] == 0
-        
-        # Link total_abs_diff to the sum of individual absolute differences
-        model += total_abs_diff == pulp.lpSum(abs_diff[i] for i in range(len(all_stocks)))
-        
-        # Constraint: Active Share should not be lower than target_active_share
-        model += 0.5 * total_abs_diff >= target_active_share * 100
-        
-        # Objective function: minimize active share
-        model += 0.5 * total_abs_diff
-        
-        # Total weight must sum to 100%
-        model += pulp.lpSum(weight[i] for i in range(len(all_stocks))) == 100
-        
-        # Maximum positions constraint
-        model += pulp.lpSum(include[i] for i in range(len(all_stocks))) <= max_positions
-        
-        # Solve the relaxed model
-        model.solve()
-    
-    # Extract the results
-    if pulp.LpStatus[model.status] != 'Optimal':
-        print(f"Failed to find a solution: {pulp.LpStatus[model.status]}")
-        return current_portfolio, []
-    
-    print(f"Optimization status: {pulp.LpStatus[model.status]}")
-    
+        print("Could not find an optimal solution with the given constraints.")
+        optimized_portfolio = {}
+        added_stocks = []
+        new_active_share = None
+        return optimized_portfolio, added_stocks, new_active_share
+
     # Create the optimized portfolio
     optimized_portfolio = {}
     added_stocks = []
@@ -455,7 +491,7 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, max_positions=60
         port_weight = optimized_portfolio.get(ticker, 0)
         bench_weight = all_stocks[i]['bench_weight']
         new_active_share += abs(port_weight - bench_weight)
-    
+        
     new_active_share = new_active_share / 2
     
     print(f"\nCalculated Active Share in optimizer: {new_active_share:.2f}%")
@@ -475,9 +511,9 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, max_positions=60
                     new_subsector_weights[subsector] += weight
                 break
     
-    # Count stocks by core rank
     core_rank_counts = defaultdict(int)
     core_rank_weights = defaultdict(float)
+
     for ticker, weight in optimized_portfolio.items():
         # Find the core rank for this ticker
         for stock in all_stocks:
@@ -524,37 +560,44 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, max_positions=60
             print(f"{subsector}: {old_weight:.2f}% → {new_weight:.2f}% (Target: {constraint_weight:.2f}%, Δ from target: {new_weight - constraint_weight:.2f}%)")
         else:
             print(f"{subsector}: {old_weight:.2f}% → {new_weight:.2f}% (Benchmark: {bench_weight:.2f}%, Δ: {new_weight - old_weight:.2f}%)")
-    
+
     return optimized_portfolio, added_stocks, new_active_share
 
-def main():
-    """Main function to run the optimizer."""
+def main(
+    data_file_path='inputs/active_share_with_core_constraints.csv',
+    constraints_file_path='inputs/stocks_to_avoid&sector_constraints.xlsm',
+    max_positions=60,
+    target_active_share=0.55,
+    sector_tolerance=0.03,
+    min_position=0.0,
+    max_position=5.0,
+    core_rank_limit=3,
+    forced_positions=None,
+    time_limit=120,
+    increment=0.5
+):
+    """Main function to run the optimizer with adjustable parameters."""
     # Load stock data from CSV
-    data_file_path = 'inputs/active_share_with_core_constraints.csv'
     stocks_data, total_active_share = load_portfolio_data_csv(data_file_path)
     
     print(f"Active Share from data: {total_active_share:.2f}%")
     print(f"Loaded {len(stocks_data)} stock entries from {data_file_path}")
     
     # Load constraints from Excel
-    constraints_file_path = 'inputs/stocks_to_avoid&sector_constraints.xlsm'
     stocks_to_avoid, sector_constraints = load_constraints(constraints_file_path)
     
     print(f"Loaded {len(stocks_to_avoid)} stocks to avoid")
     print(f"Loaded {len(sector_constraints)} sector constraints")
     
-    # Set optimization parameters
-    max_positions = 60  # Maximum total positions
-    target_active_share = 0.55  # Target Active Share (55%)
-    sector_tolerance = 0.03  # Allow 3% deviation from sector constraints
-    # No position increment needed as all positions can have any precision
-    min_position = 0.0  # No minimum position size
-    max_position = 5.0  # Maximum position size: 5%
-    core_rank_limit = 3  # Only consider stocks with Core Model rank ≤ 3
-    
     # Print the input active share for confirmation
     print(f"\nInput Active Share for optimization: {total_active_share:.2f}%")
     
+    print(f"Solver timeout set to: {time_limit} seconds")
+    if increment is not None:
+        print(f"Using position increment size: {increment}%")
+    else:
+        print("Not enforcing position increment size (using continuous weights)")
+        
     # Run the optimizer
     new_portfolio, added_stocks, optimized_active_share = optimize_portfolio_pulp(
         stocks_data, 
@@ -565,8 +608,12 @@ def main():
         stocks_to_avoid=stocks_to_avoid,
         sector_constraints=sector_constraints,
         max_position=max_position,
-        core_rank_limit=core_rank_limit
+        core_rank_limit=core_rank_limit,
+        forced_positions=forced_positions,
+        time_limit=time_limit,
+        increment=increment
     )
+    
     
     # Create a results dataframe
     print("\nCreating results spreadsheet...")
@@ -579,15 +626,18 @@ def main():
     all_tickers = set()
     for _, row in stocks_data.iterrows():
         all_tickers.add(row['Ticker'])
-    for ticker in new_portfolio.keys():
-        all_tickers.add(ticker)
     
+    # Add tickers from new portfolio (if it exists)
+    if new_portfolio:
+        for ticker in new_portfolio.keys():
+            all_tickers.add(ticker)
+            
     # Calculate active share contribution for each stock
     for ticker in all_tickers:
         # Get weights (defaulting to 0 if not present)
         bench_weight = 0
         port_weight = 0
-        new_weight = new_portfolio.get(ticker, 0)
+        new_weight = new_portfolio.get(ticker, 0) if new_portfolio else 0
         
         # Find the stock in the original data to get benchmark and portfolio weights
         stock_row = stocks_data[stocks_data['Ticker'] == ticker]
@@ -606,15 +656,17 @@ def main():
     # Print verification of active share calculations
     print(f"\nVerification - Original Active Share: {total_original_active_share:.2f}%")
     print(f"Verification - New Active Share: {total_new_active_share:.2f}%")
-    print(f"Optimizer - New Active Share: {optimized_active_share:.2f}%")
+    if optimized_active_share is None:
+        print("Optimizer - New Active Share: None (no optimal solution found)")
+    else:
+        print(f"Optimizer - New Active Share: {optimized_active_share:.2f}%")
     
     # Print an explanation if there's a significant difference
-    if abs(total_new_active_share - optimized_active_share) > 1.0:
+    if optimized_active_share is not None and abs(total_new_active_share - optimized_active_share) > 1.0:
         print("\nNote: There is a difference between the optimizer's active share calculation")
         print("and our verification calculation. This may be due to differences in how")
         print("stocks without benchmark weights are handled or rounding differences.")
-    
-    # Add header row with overall statistics
+
     # Use the optimizer's active share value for consistency
     results = [{
         'Ticker': 'TOTAL',
@@ -626,8 +678,8 @@ def main():
         'Benchmark Weight': sum(stock['Bench Weight'] for _, stock in stocks_data.iterrows() if stock['Bench Weight'] > 0),
         'Original Active Share': total_active_share,  # Use the original active share from the data
         'New Active Share': optimized_active_share,   # Use the optimizer's calculated active share
-        'Active Share Improvement': total_active_share - optimized_active_share,
-        'Improvement %': (total_active_share - optimized_active_share) / total_active_share * 100 if total_active_share > 0 else 0,
+        'Active Share Improvement': total_active_share - optimized_active_share if optimized_active_share is not None else None,
+        'Improvement %': (total_active_share - optimized_active_share) / total_active_share * 100 if optimized_active_share is not None and total_active_share > 0 else None,
         'Is New': 'No'
     }]
     
@@ -646,7 +698,7 @@ def main():
         
         # Flag if the stock is in either the original or new portfolio
         in_original = row['Portfolio Weight'] > 0
-        in_new = ticker in new_portfolio
+        in_new = ticker in new_portfolio if new_portfolio else False
         
         # Skip any records without a ticker (like sector headers)
         if pd.isna(ticker):
@@ -661,13 +713,13 @@ def main():
             'Sector-and-Subsector': row['Sector-and-Subsector'],
             'Core Rank': row['Core Model'],
             'Current Weight': row['Portfolio Weight'],
-            'New Weight': new_portfolio.get(ticker, 0),
+            'New Weight': new_portfolio.get(ticker, 0) if new_portfolio else 0,
             'Benchmark Weight': row['Bench Weight'],
-            'Weight Change': new_portfolio.get(ticker, 0) - row['Portfolio Weight'],
+            'Weight Change': (new_portfolio.get(ticker, 0) - row['Portfolio Weight']) if new_portfolio else 0,
             'Original Active Share': original_as,
             'New Active Share': new_as,
-            'Active Share Improvement': as_improvement,
-            'Improvement %': (as_improvement / original_as * 100) if original_as > 0 else 0 if original_as == 0 else 'N/A',
+            'Active Share Improvement': as_improvement if optimized_active_share is not None else None,
+            'Improvement %': (as_improvement / original_as * 100) if optimized_active_share is not None and original_as > 0 else None,
             'In Original Portfolio': 'Yes' if in_original else 'No',
             'In New Portfolio': 'Yes' if in_new else 'No',
             'Is New': 'Yes' if is_new_position else 'No'
@@ -700,9 +752,11 @@ def main():
                 'Is New': 'Yes'
             })
     
+    # Create results spreadsheet even if no solution was found
     # Sort by sector and weight
     results_df = pd.DataFrame(results)
-    results_df = results_df.sort_values(by=['Sector', 'New Weight'], ascending=[True, False])
+    if len(results_df) > 0:  # Only sort if we have results
+        results_df = results_df.sort_values(by=['Sector', 'New Weight'], ascending=[True, False])
     
     # Create sector analysis data
     sector_analysis = []
@@ -789,28 +843,33 @@ def main():
         'Weight Change': sum(item['Weight Change'] for item in sector_analysis),
         'Improvement': sum(item['Improvement'] for item in sector_analysis),
     })
-    
     # Create dataframes for sector and subsector analysis
     sector_df = pd.DataFrame(sector_analysis)
     subsector_df = pd.DataFrame(subsector_analysis)
     
-    # Create outputs directory if it doesn't exist
+    output_file = save_optimizer_results_to_excel(results_df, sector_df, subsector_df)
+
+    return new_portfolio, added_stocks, optimized_active_share, output_file
+
+def save_optimizer_results_to_excel(results_df, sector_df, subsector_df):
+    """Save the optimizer results to an Excel file with all sheets."""
+    import os
+    from datetime import datetime
     outputs_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'outputs')
     os.makedirs(outputs_dir, exist_ok=True)
-    
-    # Define output file path
-    output_file = os.path.join(outputs_dir, 'Optimized_Portfolio_PuLP.xlsx')
-    
-    # Save all dataframes to Excel (different sheets)
+    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M')
+    output_file = os.path.join(outputs_dir, f'Optimized_Portfolio_PuLP_{timestamp}.xlsx')
     with pd.ExcelWriter(output_file) as writer:
         results_df.to_excel(writer, sheet_name='Portfolio', index=False)
         sector_df.to_excel(writer, sheet_name='Sector Analysis', index=False)
         subsector_df.to_excel(writer, sheet_name='Subsector Analysis', index=False)
-    
     print(f"Results saved to '{output_file}'")
+    print('---------------------------------------------------')
+    print('---------------------------------------------------')
+    print('---------------------------------------------------')
+    print('---------------------------------------------------')
+    print('---------------------------------------------------')
+    return output_file
 
 if __name__ == "__main__":
     main()
-
-# --- Streamlit UI for Active Share Optimizer ---
-# See streamlit_app.py for the interactive interface
