@@ -193,11 +193,3 @@ ActiveShareOptimizer/
 ## 📝 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 📬 Contact
-
-For questions, issues, or feature requests, please [open an issue](https://github.com/yourusername/ActiveShareOptimizer/issues) on GitHub.
-
----
-
-Created with ❤️ by [Your Name]
