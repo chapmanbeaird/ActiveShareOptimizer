@@ -2,8 +2,6 @@
 
 An interactive portfolio optimization tool that helps portfolio managers adjust their stock holdings to achieve a target Active Share while respecting sector, position size, and other constraints. Powered by PuLP and the CBC Solver for mixed-integer linear programming optimization.
 
-![Active Share Optimizer Screenshot](https://via.placeholder.com/800x450.png?text=Active+Share+Optimizer)
-
 ## 🌟 Features
 
 - **Portfolio Analysis**: Load your current portfolio and benchmark weights from a CSV file
