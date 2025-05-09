@@ -3,9 +3,9 @@ import pandas as pd
 import io
 import time
 import threading
-from active_share_optimizer_pulp import (
-    load_portfolio_data_csv,
-    load_constraints,
+import tempfile
+from optimizer import (
+    load_optimizer_input_file,
     optimize_portfolio_pulp,
     main as optimizer_main
 )
@@ -13,6 +13,7 @@ from active_share_optimizer_pulp import (
 # Global variable to track optimization progress
 optimization_time = 0
 optimization_running = False
+optimization_result = [None]  # Use a list to store the result across threads
 
 def timer_thread():
     global optimization_time, optimization_running
@@ -22,209 +23,418 @@ def timer_thread():
         time.sleep(1)
         optimization_time += 1
 
+def run_optimizer_thread(data_file_path, num_positions, target_active_share, sector_tolerance, 
+                        min_position, max_position, core_rank_limit, forced_positions, 
+                        time_limit, increment):
+    global optimization_running, optimization_result
+    try:
+        optimization_result[0] = optimizer_main(
+            data_file_path=data_file_path,
+            num_positions=num_positions,
+            target_active_share=target_active_share,
+            sector_tolerance=sector_tolerance,
+            min_position=min_position,
+            max_position=max_position,
+            core_rank_limit=core_rank_limit,
+            forced_positions=forced_positions,
+            time_limit=time_limit,
+            increment=increment
+        )
+    except Exception as e:
+        print(f"Error in optimizer thread: {e}")
+        optimization_result[0] = (None, None, None, None)
+    finally:
+        optimization_running = False
+
 def main():
-    global optimization_time, optimization_running
+    global optimization_time, optimization_running, optimization_result
+    
+    # Initialize session state for toggle states if they don't exist
+    if 'show_portfolio' not in st.session_state:
+        st.session_state.show_portfolio = True
+    if 'show_additions' not in st.session_state:
+        st.session_state.show_additions = True
+    if 'show_sectors' not in st.session_state:
+        st.session_state.show_sectors = True
+    if 'optimization_completed' not in st.session_state:
+        st.session_state.optimization_completed = False
+    if 'optimization_data' not in st.session_state:
+        st.session_state.optimization_data = None
     
     st.title("Active Share Optimizer (PuLP)")
-    st.write("Upload your portfolio and constraints, then adjust parameters to optimize your portfolio interactively.")
+    st.write("Upload your portfolio file containing stocks, constraints, and locked tickers, then adjust parameters to optimize your portfolio.")
 
-    # --- File uploads ---
-    portfolio_file = st.file_uploader("Upload Portfolio CSV (e.g. active_share_with_core_constraints.csv)", type=["csv"])
-    constraints_file = st.file_uploader("Upload Constraints Excel (e.g. stocks_to_avoid&sector_constraints.xlsm)", type=["xls", "xlsx", "xlsm"])
-
-    st.sidebar.header("Optimizer Parameters")
-    max_positions = st.sidebar.slider("Max Positions", min_value=10, max_value=100, value=60, step=1)
-    target_active_share = st.sidebar.slider("Target Active Share (%)", min_value=0.0, max_value=100.0, value=55.0, step=0.5)
-    sector_tolerance = st.sidebar.slider("Sector Tolerance (%)", min_value=0.0, max_value=10.0, value=3.0, step=0.1)
-    min_position = st.sidebar.slider("Min Position Size (%)", min_value=0.0, max_value=5.0, value=1.0, step=0.1)
-    max_position = st.sidebar.slider("Max Position Size (%)", min_value=0.5, max_value=10.0, value=5.0, step=0.1)
-    core_rank_limit = st.sidebar.selectbox("Max Core Model Rank", options=[1, 2, 3, 4, 5], index=2)
-    
-    # Position size constraint mode selection
-    weight_mode = st.sidebar.radio(
-        "Position Size Mode:",
-        ["Continuous Weights", "Discrete Increments"],
-        index=1,
-        help="Continuous: Any value between min and max. Discrete: Only specific incremental values."
-    )
-    
-    increment = None
-    if weight_mode == "Discrete Increments":
-        increment = st.sidebar.slider("Position Increment Size (%)", 
-                              min_value=0.01, max_value=1.0, 
-                              value=0.5, step=0.01, 
-                              help="Position sizes will be multiples of this increment")
-        st.sidebar.info(f"Position sizes will be multiples of {increment}% (e.g., {min_position}%, {min_position+increment}%, {min_position+2*increment}%, etc.)")
-    else:
-        st.sidebar.info("Position sizes can be any value between the min and max position size")
-    
-    # Add timeout parameter to sidebar
-    time_limit = st.sidebar.slider("Solver Timeout (seconds)", min_value=30, max_value=600, value=120, step=30, 
-                                help="Maximum time allowed for the solver to find a solution.")
+    # --- File upload ---
+    input_file = st.file_uploader("Upload Optimizer Input File (optimizer_input_file.xlsm)", type=["xls", "xlsx", "xlsm"])
     
     # --- Ticker selection and forced positions ---
     all_tickers = []
-    if portfolio_file:
+    if input_file:
         try:
-            portfolio_file.seek(0)
-            temp_stocks_data, _ = load_portfolio_data_csv(portfolio_file)
+            input_file.seek(0)
+            temp_stocks_data, _, _, _, _ = load_optimizer_input_file(input_file)
             all_tickers = sorted(temp_stocks_data['Ticker'].unique())
-        except Exception:
-            pass
+        except Exception as e:
+            st.error(f"Error loading tickers from file: {e}")
+            
     st.sidebar.header("Force Stock Holdings")
     selected_tickers = st.sidebar.multiselect(
         "Search and select tickers to force in portfolio:",
         options=all_tickers,
-        help="Type to search. For each selected ticker, you can force ownership and set min/max position size."
+        help="Type to search. For each selected ticker, you can force ownership at a specific weight range."
     )
+    
     forced_positions = {}
     for ticker in selected_tickers:
-        min_val = st.sidebar.number_input(f"{ticker} min %", min_value=0.0, max_value=100.0, value=1.0, step=0.01, key=f"min_{ticker}")
-        max_val = st.sidebar.number_input(f"{ticker} max %", min_value=min_val, max_value=100.0, value=5.0, step=0.01, key=f"max_{ticker}")
-        forced_positions[ticker] = (min_val, max_val)
+        st.sidebar.markdown(f"### {ticker}")
+        min_weight = st.sidebar.slider(
+            f"Min Weight for {ticker} (%)",
+            min_value=1.0,
+            max_value=5.0,
+            value=1.0,
+            step=0.5,
+            key=f"min_{ticker}"
+        )
+        max_weight = st.sidebar.slider(
+            f"Max Weight for {ticker} (%)",
+            min_value=min_weight,
+            max_value=5.0,
+            value=min(min_weight + 1.0, 5.0),
+            step=0.5,
+            key=f"max_{ticker}"
+        )
+        forced_positions[ticker] = (min_weight, max_weight)
     
-    if st.button("Run Optimizer"):
-        if not portfolio_file or not constraints_file:
-            st.error("Please upload both a portfolio CSV and a constraints Excel file.")
-            return
-        
-        # Create a progress display area
-        progress_container = st.empty()
-        timer_display = st.empty()
-        
-        # Start the timer thread
-        timer_thread_obj = threading.Thread(target=timer_thread)
-        timer_thread_obj.daemon = True
-        timer_thread_obj.start()
-        
-        # Show progress message
-        progress_container.info("Optimization in progress...")
-        
-        # Save uploaded files to temporary locations
-        import tempfile
-        portfolio_file.seek(0)
-        constraints_file.seek(0)
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as temp_portfolio:
-            temp_portfolio.write(portfolio_file.read())
-            portfolio_path = temp_portfolio.name
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsm') as temp_constraints:
-            temp_constraints.write(constraints_file.read())
-            constraints_path = temp_constraints.name
-        
-        # Create a placeholder for progress information
-        progress_bar = st.progress(0)
-        status_text = st.empty()
-        
-        # Run optimizer in a separate thread to keep UI responsive
-        optimizer_result = [None]  # Use a list to store the result across threads
-        
-        def run_optimizer():
-            global optimization_running
-            try:
-                optimizer_result[0] = optimizer_main(
-                    data_file_path=portfolio_path,
-                    constraints_file_path=constraints_path,
-                    max_positions=max_positions,
-                    target_active_share=target_active_share/100.0,  # convert to fraction
-                    sector_tolerance=sector_tolerance/100.0,        # convert to fraction
-                    min_position=min_position,
-                    max_position=max_position,
-                    core_rank_limit=core_rank_limit,
-                    forced_positions=forced_positions,
-                    time_limit=time_limit,
-                    increment=increment  # Pass the increment parameter
-                )
-            finally:
-                optimization_running = False
-        
-        optimizer_thread = threading.Thread(target=run_optimizer)
-        optimizer_thread.daemon = True
-        optimizer_thread.start()
-        
-        # Update timer display in a loop until optimization completes
-        result = None
-        try:
-            while optimization_running:
-                # Update progress bar to show percentage of time limit used
-                progress_percent = min(optimization_time / time_limit, 1.0)
-                progress_bar.progress(progress_percent)
-                
-                # Update timer display
-                timer_display.info(f"Optimization running... Time elapsed: {optimization_time} seconds (Timeout: {time_limit} seconds)")
-                
-                # Check if we should stop due to timeout
-                if optimization_time >= time_limit:
-                    # If we've exceeded the time limit by a significant margin, force stop
-                    if optimization_time >= time_limit + 10:
-                        st.warning("Forcing solver to stop due to timeout...")
-                        optimization_running = False
-                        break
-                
-                time.sleep(0.1)  # More frequent updates for smoother progress bar
-            
-            # Wait for optimizer thread to complete
-            optimizer_thread.join(timeout=10)
-            if optimizer_thread.is_alive():
-                st.error("Optimizer is still running but taking too long. Please refresh the page and try again with different parameters.")
-                return
-                
-            # Get results from optimizer_main
-            if optimizer_result[0] is None:
-                st.error("Optimization failed to return a result.")
-                return
-                
-            optimized_portfolio, added_stocks, new_active_share, output_file = optimizer_result[0]
-        
-        finally:
-            # Clear progress displays
+    # --- Optimization parameters ---
+    st.sidebar.header("Optimization Parameters")
+    
+    num_positions = st.sidebar.slider(
+        "Total Positions",
+        min_value=30,
+        max_value=100,
+        value=60,
+        step=1,
+        help="Exact number of positions required in the portfolio."
+    )
+    
+    target_active_share = st.sidebar.slider(
+        "Target Active Share (%)",
+        min_value=30.0,
+        max_value=80.0,
+        value=55.0,
+        step=0.5,
+        help="Target Active Share percentage. The optimizer will try to achieve this level of active share."
+    ) / 100.0  # Convert to decimal
+    
+    sector_tolerance = st.sidebar.slider(
+        "Sector Tolerance (%)",
+        min_value=0.0,
+        max_value=10.0,
+        value=3.0,
+        step=0.5,
+        help="Maximum allowed deviation from benchmark sector weights."
+    ) / 100.0  # Convert to decimal
+    
+    min_position = st.sidebar.slider(
+        "Minimum Position Size (%)",
+        min_value=0.5,
+        max_value=3.0,
+        value=1.0,
+        step=0.5,
+        help="Minimum position size as a percentage."
+    )
+    
+    max_position = st.sidebar.slider(
+        "Maximum Position Size (%)",
+        min_value=3.0,
+        max_value=10.0,
+        value=5.0,
+        step=0.5,
+        help="Maximum position size as a percentage."
+    )
+    
+    core_rank_limit = st.sidebar.slider(
+        "Core Rank Limit",
+        min_value=1,
+        max_value=5,
+        value=3,
+        step=1,
+        help="Only consider stocks with Core Model rank <= this value."
+    )
+    
+    time_limit = st.sidebar.slider(
+        "Solver Time Limit (seconds)",
+        min_value=30,
+        max_value=300,
+        value=120,
+        step=30,
+        help="Maximum time allowed for the solver."
+    )
+    
+    use_increments = st.sidebar.checkbox(
+        "Use Position Increments",
+        value=True,
+        help="If checked, positions will be in increments of the specified size. If unchecked, continuous weights will be used."
+    )
+    
+    increment = None
+    if use_increments:
+        increment = st.sidebar.slider(
+            "Position Increment Size (%)",
+            min_value=0.1,
+            max_value=1.0,
+            value=0.5,
+            step=0.1,
+            help="Allowed increment for position sizes."
+        )
+    
+    # --- Run optimization button ---
+    if st.button("Run Optimization", type="primary"):
+        if input_file is None:
+            st.error("Please upload an input file.")
+        else:
+            # Reset global variables
             optimization_running = False
-            progress_bar.empty()
-            status_text.empty()
-            timer_display.empty()
-            progress_container.empty()
+            optimization_time = 0
+            optimization_result[0] = None
+            
+            # Create progress display
+            progress_placeholder = st.empty()
+            progress_bar = st.progress(0)
+            
+            try:
+                # Save uploaded file to a temporary location
+                input_file.seek(0)
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsm') as temp_input:
+                    temp_input.write(input_file.read())
+                    input_path = temp_input.name
+                
+                # Start the timer thread
+                optimization_running = True
+                timer_thread_obj = threading.Thread(target=timer_thread)
+                timer_thread_obj.daemon = True
+                timer_thread_obj.start()
+                
+                # Start the optimizer thread
+                optimizer_thread = threading.Thread(
+                    target=run_optimizer_thread,
+                    args=(input_path, num_positions, target_active_share, sector_tolerance,
+                          min_position, max_position, core_rank_limit, forced_positions,
+                          time_limit, increment)
+                )
+                optimizer_thread.daemon = True
+                optimizer_thread.start()
+                
+                # Display progress while optimization is running
+                while optimization_running:
+                    # Update progress bar
+                    progress_percent = min(optimization_time / time_limit, 1.0)
+                    progress_bar.progress(progress_percent)
+                    progress_placeholder.info(f"Optimization running for {optimization_time} seconds (timeout: {time_limit}s)...")
+                    
+                    # Check for timeout
+                    if optimization_time >= time_limit + 10:  # Give a little extra time
+                        st.warning("Optimization taking longer than expected. Checking status...")
+                        if not optimizer_thread.is_alive():
+                            break
+                    
+                    time.sleep(0.1)  # Small sleep to prevent UI freezing
+                
+                # Wait for optimizer thread to complete if it's still running
+                if optimizer_thread.is_alive():
+                    st.info("Finalizing optimization...")
+                    optimizer_thread.join(timeout=10)
+                
+                # Get the results
+                if optimization_result[0] is None:
+                    st.error("Optimization failed or was interrupted.")
+                    return
+                
+                # Unpack the results
+                new_portfolio, added_stocks, optimized_active_share, output_file = optimization_result[0]
+                
+                # Store optimization results in session state
+                st.session_state.optimization_completed = True
+                st.session_state.optimization_data = {
+                    'new_portfolio': new_portfolio,
+                    'added_stocks': added_stocks,
+                    'optimized_active_share': optimized_active_share,
+                    'output_file': output_file,
+                    'input_path': input_path
+                }
+                
+                # Clear progress displays
+                progress_placeholder.empty()
+                progress_bar.empty()
+                
+            except Exception as e:
+                st.error(f"Error during optimization: {e}")
+                # Stop the timer thread
+                optimization_running = False
+    
+    # Display results if optimization has been completed
+    if st.session_state.optimization_completed and st.session_state.optimization_data is not None:
+        # Extract data from session state
+        new_portfolio = st.session_state.optimization_data['new_portfolio']
+        added_stocks = st.session_state.optimization_data['added_stocks']
+        optimized_active_share = st.session_state.optimization_data['optimized_active_share']
+        output_file = st.session_state.optimization_data['output_file']
+        input_path = st.session_state.optimization_data['input_path']
         
-        if new_active_share is None:
-            st.error("Could not find an optimal solution with the given constraints. Please try adjusting the parameters.")
-            
-            # Show helpful suggestions for fixing the infeasibility
-            st.warning("""
-            Common reasons for infeasibility include:
-            1. The target active share is too high or too low for the given constraints
-            2. Forcing certain stocks creates conflicts with sector constraints
-            3. The constraints on position sizes are too restrictive
-            
-            Try these adjustments:
-            - Lower the target active share slightly
-            - Increase sector tolerance
-            - Adjust or remove forced positions
-            - Increase the maximum position size
-            """)
-            
-            # Still display the output file if it was created
-            if output_file:
-                st.info(f"A partial results file was saved to: {output_file}")
-            
-            return
-            
-        st.success(f"Optimization complete! New Active Share: {new_active_share:.2f}%")
-        st.write("### Optimized Portfolio")
-        results_df = pd.DataFrame(list(optimized_portfolio.items()), columns=["Ticker", "Weight (%)"])
-        st.dataframe(results_df)
-        st.write("### Added Stocks")
-        # Display only the ticker symbols for added stocks (handle both list of dicts and list of strings)
-        if added_stocks:
-            if isinstance(added_stocks[0], dict):
-                st.write(", ".join(stock['ticker'] for stock in added_stocks))
-            else:
-                st.write(", ".join(str(stock) for stock in added_stocks))
+        # Display the results
+        if optimized_active_share is None:
+            st.error("No optimal solution found with the given constraints.")
         else:
-            st.write("None")
-
-        if output_file:
-            st.success(f"Results saved to: {output_file}")
-            st.info("For a full breakdown of the optimized portfolio, sector, and subsector analysis, please check the output Excel file. The filename will be timestamped.")
-        else:
-            st.warning("No output file was generated.")
+            # Get the original active share from the data
+            _, original_active_share, _, _, _ = load_optimizer_input_file(input_path)
+            
+            st.success(f"Optimization complete!")
+            st.write(f"Original Active Share: {original_active_share:.2f}%")
+            st.write(f"Optimized Active Share: {optimized_active_share:.2f}%")
+            st.write(f"Improvement: {original_active_share - optimized_active_share:.2f}%")
+            st.write(f"Final number of positions: {len(new_portfolio)}")
+            st.write(f"New positions added: {len(added_stocks)}")
+            
+            # Display the output file - moved to top before checkboxes
+            with open(output_file, "rb") as f:
+                st.download_button(
+                    label="Download Optimized Portfolio",
+                    data=f,
+                    file_name=f"Optimized_Portfolio.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+            
+            # Add toggles for detailed information with session state
+            st.session_state.show_portfolio = st.checkbox("Show Full Portfolio", value=st.session_state.show_portfolio)
+            st.session_state.show_additions = st.checkbox("Show New Additions", value=st.session_state.show_additions)
+            st.session_state.show_sectors = st.checkbox("Show Sector Breakdown", value=st.session_state.show_sectors)
+            
+            # Display portfolio holdings
+            if st.session_state.show_portfolio:
+                st.subheader("Optimized Portfolio Holdings")
+                
+                # Convert portfolio to DataFrame for better display
+                portfolio_df = pd.DataFrame(list(new_portfolio.items()), columns=["Ticker", "Weight (%)"])
+                portfolio_df = portfolio_df.sort_values(by="Weight (%)", ascending=False)
+                
+                # Display as a table with formatting - removed rounding
+                st.dataframe(
+                    portfolio_df,
+                    column_config={
+                        "Ticker": st.column_config.TextColumn("Ticker"),
+                        "Weight (%)": st.column_config.NumberColumn(
+                            "Weight (%)",
+                            help="Position weight as a percentage"
+                        )
+                    },
+                    hide_index=True,
+                    use_container_width=True
+                )
+            
+            # Display sector breakdown
+            if st.session_state.show_sectors:
+                st.subheader("Sector Breakdown")
+                
+                # Get the original data to extract sector information
+                stocks_data, _, _, _, _ = load_optimizer_input_file(input_path)
+                
+                # Create a mapping of tickers to sectors
+                ticker_to_sector = {}
+                ticker_to_subsector = {}
+                for _, row in stocks_data.iterrows():
+                    ticker = row['Ticker']
+                    if pd.notna(ticker):
+                        ticker_to_sector[ticker] = row.get('Sector', 'Unknown')
+                        ticker_to_subsector[ticker] = row.get('Sector-and-Subsector', 'Unknown')
+                
+                # Calculate sector weights in the optimized portfolio
+                sector_weights = {}
+                subsector_weights = {}
+                
+                for ticker, weight in new_portfolio.items():
+                    sector = ticker_to_sector.get(ticker, 'Unknown')
+                    subsector = ticker_to_subsector.get(ticker, 'Unknown')
+                    
+                    if sector not in sector_weights:
+                        sector_weights[sector] = 0
+                    sector_weights[sector] += weight
+                    
+                    if subsector not in subsector_weights:
+                        subsector_weights[subsector] = 0
+                    subsector_weights[subsector] += weight
+                
+                # Convert to DataFrames
+                sector_df = pd.DataFrame(list(sector_weights.items()), columns=["Sector", "Weight (%)"])
+                sector_df = sector_df.sort_values(by="Weight (%)", ascending=False)
+                
+                subsector_df = pd.DataFrame(list(subsector_weights.items()), columns=["Subsector", "Weight (%)"])
+                subsector_df = subsector_df.sort_values(by="Weight (%)", ascending=False)
+                
+                # Display sector breakdown - removed rounding
+                st.write("By Sector:")
+                st.dataframe(
+                    sector_df,
+                    column_config={
+                        "Sector": st.column_config.TextColumn("Sector"),
+                        "Weight (%)": st.column_config.NumberColumn("Weight (%)")
+                    },
+                    hide_index=True,
+                    use_container_width=True
+                )
+                
+                # Display subsector breakdown - removed rounding
+                st.write("By Subsector:")
+                st.dataframe(
+                    subsector_df,
+                    column_config={
+                        "Subsector": st.column_config.TextColumn("Subsector"),
+                        "Weight (%)": st.column_config.NumberColumn("Weight (%)")
+                    },
+                    hide_index=True,
+                    use_container_width=True
+                )
+            
+            # Display new additions
+            if added_stocks and st.session_state.show_additions:
+                st.subheader("New Additions to Portfolio")
+                
+                # Extract ticker and weight information from added_stocks
+                new_additions = []
+                for stock in added_stocks:
+                    ticker = stock['ticker']
+                    weight = stock.get('new_weight', new_portfolio.get(ticker, 0))
+                    sector = stock.get('sector', '')
+                    subsector = stock.get('subsector', '')
+                    core_rank = stock.get('core_rank', 'N/A')
+                    bench_weight = stock.get('bench_weight', 0)
+                    
+                    new_additions.append({
+                        "Ticker": ticker,
+                        "Weight (%)": weight,
+                        "Sector": sector,
+                        "Subsector": subsector,
+                        "Core Rank": core_rank,
+                        "Benchmark Weight (%)": bench_weight
+                    })
+                
+                # Convert to DataFrame and display
+                additions_df = pd.DataFrame(new_additions)
+                additions_df = additions_df.sort_values(by=["Sector", "Weight (%)"], ascending=[True, False])
+                
+                # Display as a table with formatting - removed rounding
+                st.dataframe(
+                    additions_df,
+                    column_config={
+                        "Ticker": st.column_config.TextColumn("Ticker"),
+                        "Weight (%)": st.column_config.NumberColumn("Weight (%)"),
+                        "Sector": st.column_config.TextColumn("Sector"),
+                        "Subsector": st.column_config.TextColumn("Subsector"),
+                        "Core Rank": st.column_config.NumberColumn("Core Rank"),
+                        "Benchmark Weight (%)": st.column_config.NumberColumn("Benchmark Weight (%)")
+                    },
+                    hide_index=True,
+                    use_container_width=True
+                )
 
 if __name__ == "__main__":
     main()

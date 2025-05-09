@@ -112,7 +112,7 @@ def load_portfolio_data_csv(file_path):
     return data, total_active_share
 
 def load_constraints(file_path):
-    """Load the stocks to avoid and sector constraints."""
+    """Load the stocks to avoid and sector constraints. Used for backward compatibility."""
     # Read the Excel file
     data = pd.read_excel(file_path)
     
@@ -127,9 +127,74 @@ def load_constraints(file_path):
     
     return stocks_to_avoid, sector_constraints
 
+def load_optimizer_input_file(file_path):
+    """
+    Load all optimizer input data from a single Excel file.
+    This includes:
+    - Stock data (active share, benchmark weights, portfolio weights)
+    - Stocks to avoid
+    - Sector constraints
+    - Locked ticker-and-weights
+
+    Returns:
+    - stocks_data: DataFrame containing stock data
+    - total_active_share: The calculated total active share
+    - stocks_to_avoid: List of ticker symbols to exclude from the portfolio
+    - sector_constraints: Dictionary mapping sector-and-subsector to target weights
+    - locked_tickers: Dictionary {ticker: weight} of tickers that should not be changed
+    """
+    # Read the Excel file
+    data = pd.read_excel(file_path, sheet_name=0)
+    
+    # Process stock data
+    data.columns = data.columns.str.strip()
+    
+    # Convert weight columns to numeric values
+    data['Bench Weight'] = pd.to_numeric(data['Bench Weight'], errors='coerce').fillna(0)
+    data['Portfolio Weight'] = pd.to_numeric(data['Portfolio Weight'], errors='coerce').fillna(0)
+    data['Active Share'] = pd.to_numeric(data['Active Share'], errors='coerce').fillna(0)
+    data['Core Model'] = pd.to_numeric(data['Core Model'], errors='coerce')
+    
+    # Calculate the total active share directly from the portfolio and benchmark weights
+    # This is the correct formula for active share: sum(|portfolio_weight - benchmark_weight|) / 2
+    # Since weights are already in percentages (e.g., 1.5 means 1.5%), we don't need to multiply by 100
+    absolute_diffs = abs(data['Portfolio Weight'] - data['Bench Weight'])
+    total_active_share = (absolute_diffs.sum() / 2)
+    
+    # Get locked tickers (where "Lock ticker-and-weight" column is 'Y')
+    locked_tickers = {}
+    if 'Lock ticker-and-weight' in data.columns:
+        locked_data = data[data['Lock ticker-and-weight'] == 'Y']
+        for _, row in locked_data.iterrows():
+            locked_tickers[row['Ticker']] = row['Portfolio Weight']
+    
+    # Get constraints from other sheets in the workbook
+    try:
+        constraints_data = pd.read_excel(file_path, sheet_name='Constraints')
+        
+        # Get the list of stocks to avoid
+        if 'Stocks to Avoid' in constraints_data.columns:
+            stocks_to_avoid = constraints_data['Stocks to Avoid'].dropna().tolist()
+        else:
+            stocks_to_avoid = []
+        
+        # Get the sector constraints
+        sector_constraints = {}
+        if 'Emp Sector & Industry' in constraints_data.columns and 'Weight' in constraints_data.columns:
+            for _, row in constraints_data.iterrows():
+                if pd.notna(row['Emp Sector & Industry']) and pd.notna(row['Weight']):
+                    sector_constraints[row['Emp Sector & Industry']] = row['Weight']
+    except Exception as e:
+        print(f"Warning: Could not load constraints from separate sheet: {e}")
+        stocks_to_avoid = []
+        sector_constraints = {}
+    
+    return data, total_active_share, stocks_to_avoid, sector_constraints, locked_tickers
+
 def optimize_portfolio_pulp(stocks_data, original_active_share, max_positions=60, target_active_share=0.55, 
                             sector_tolerance=0.03, stocks_to_avoid=None, sector_constraints=None, 
-                            min_position=1.0, max_position=5.0, core_rank_limit=3, increment=0.5, forced_positions=None, time_limit=120):
+                            min_position=1.0, max_position=5.0, core_rank_limit=3, increment=0.5, forced_positions=None, time_limit=120,
+                            locked_tickers=None):
     """
     Optimize the portfolio to reduce Active Share while applying constraints.
     
@@ -146,6 +211,8 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, max_positions=60
     - core_rank_limit: Only consider stocks with Core Model rank <= this value (e.g., 1, 2, 3, 4, 5)
     - increment: Allowed increment for position sizes (e.g., 0.5 for 0.5% increments)
     - forced_positions: Dictionary {ticker: (min, max)}. For each ticker, require it to be in the portfolio with weight between min and max.
+    - time_limit: Maximum time allowed for the solver (in seconds)
+    - locked_tickers: Dictionary {ticker: weight}. For each ticker, require it to be in the portfolio with exactly its current weight.
     
     Returns:
     - optimized_portfolio: Dictionary of ticker to weight for the optimized portfolio
@@ -159,6 +226,13 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, max_positions=60
         sector_constraints = {}
     if forced_positions is None:
         forced_positions = {}
+    if locked_tickers is None:
+        locked_tickers = {}
+        
+    # Automatically add locked tickers to forced positions with exact weights
+    for ticker, locked_weight in locked_tickers.items():
+        print(f"Locking ticker {ticker} at exact weight: {locked_weight}%")
+        forced_positions[ticker] = (locked_weight, locked_weight)  # Set min and max to the same value to lock weight
     
     # Find current portfolio positions (stocks with positive weights)
     portfolio_stocks = stocks_data[stocks_data['Portfolio Weight'] > 0]
@@ -411,14 +485,16 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, max_positions=60
 
     # Constraint: Filter out stocks in the stocks_to_avoid list
     for ticker in stocks_to_avoid:
-        if ticker in ticker_to_index and ticker not in forced_positions:
+        # Don't exclude a ticker if it's locked or in forced positions
+        if ticker in ticker_to_index and ticker not in forced_positions and ticker not in locked_tickers:
             i = ticker_to_index[ticker]
             model += include[i] == 0
 
     # Core rank constraint: Only select stocks with Core Rank <= core_rank_limit
     for i in range(len(all_stocks)):
         ticker = all_stocks[i]['ticker']
-        if all_stocks[i]['core_rank'] > core_rank_limit and ticker not in forced_positions:
+        # Don't apply core rank constraints to locked or forced tickers
+        if all_stocks[i]['core_rank'] > core_rank_limit and ticker not in forced_positions and ticker not in locked_tickers:
             model += include[i] == 0
 
     # abs_diff constraints for active share
@@ -564,8 +640,8 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, max_positions=60
     return optimized_portfolio, added_stocks, new_active_share
 
 def main(
-    data_file_path='inputs/active_share_with_core_constraints.csv',
-    constraints_file_path='inputs/stocks_to_avoid&sector_constraints.xlsm',
+    data_file_path='inputs/optimizer_input_file.xlsm',
+    constraints_file_path=None,  # Optional for backward compatibility
     max_positions=60,
     target_active_share=0.55,
     sector_tolerance=0.03,
@@ -577,17 +653,31 @@ def main(
     increment=0.5
 ):
     """Main function to run the optimizer with adjustable parameters."""
-    # Load stock data from CSV
-    stocks_data, total_active_share = load_portfolio_data_csv(data_file_path)
     
-    print(f"Active Share from data: {total_active_share:.2f}%")
-    print(f"Loaded {len(stocks_data)} stock entries from {data_file_path}")
-    
-    # Load constraints from Excel
-    stocks_to_avoid, sector_constraints = load_constraints(constraints_file_path)
+    # Check if we're using the consolidated file or separate files (backward compatibility)
+    if constraints_file_path:
+        print("Using separate stock data and constraints files (legacy mode)")
+        # Load stock data from CSV
+        stocks_data, total_active_share = load_portfolio_data_csv(data_file_path)
+        
+        print(f"Active Share from data: {total_active_share:.2f}%")
+        print(f"Loaded {len(stocks_data)} stock entries from {data_file_path}")
+        
+        # Load constraints from Excel
+        stocks_to_avoid, sector_constraints = load_constraints(constraints_file_path)
+        
+        # No locked tickers in legacy mode
+        locked_tickers = {}
+    else:
+        # Load all data from single input file
+        stocks_data, total_active_share, stocks_to_avoid, sector_constraints, locked_tickers = load_optimizer_input_file(data_file_path)
+        
+        print(f"Active Share from data: {total_active_share:.2f}%")
+        print(f"Loaded {len(stocks_data)} stock entries from {data_file_path}")
     
     print(f"Loaded {len(stocks_to_avoid)} stocks to avoid")
     print(f"Loaded {len(sector_constraints)} sector constraints")
+    print(f"Found {len(locked_tickers)} locked tickers that will maintain their current weight")
     
     # Print the input active share for confirmation
     print(f"\nInput Active Share for optimization: {total_active_share:.2f}%")
@@ -611,7 +701,8 @@ def main(
         core_rank_limit=core_rank_limit,
         forced_positions=forced_positions,
         time_limit=time_limit,
-        increment=increment
+        increment=increment,
+        locked_tickers=locked_tickers
     )
     
     

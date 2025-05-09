@@ -4,8 +4,8 @@ An interactive portfolio optimization tool that helps portfolio managers adjust 
 
 ## 🌟 Features
 
-- **Portfolio Analysis**: Load your current portfolio and benchmark weights from a CSV file
-- **Constraint Management**: Import constraints like restricted stocks and sector targets from Excel
+- **Portfolio Analysis**: Load your current portfolio, benchmark weights, and constraints from a single Excel file
+- **Ticker Locking**: Lock specific stocks to maintain their exact current weights
 - **Interactive UI**: Adjust all parameters through an intuitive Streamlit web interface
 - **Advanced Optimization**: Uses mixed-integer linear programming for optimal stock selection
 - **Position Size Controls**: Choose between continuous weights or discrete increments
@@ -113,34 +113,45 @@ An interactive portfolio optimization tool that helps portfolio managers adjust 
 
 2. **Open your browser** to the URL shown in the terminal (usually http://localhost:8501)
 
-3. **Upload your files**:
-   - Portfolio CSV (e.g., `active_share_with_core_constraints.csv`)
-   - Constraints Excel (e.g., `stocks_to_avoid&sector_constraints.xlsm`)
+3. **Upload your file**:
+   - Optimizer Input Excel (e.g., `optimizer_input_file.xlsm`)
 
 4. **Adjust parameters in the sidebar** and click "Run Optimizer"
 
-## 📊 Input File Formats
+## 📊 Input File Format
 
-### Portfolio CSV Format
-Your CSV file should include the following columns:
+### Optimizer Input Excel Format
+Your Excel file (`optimizer_input_file.xlsm`) should include:
+
+#### Main Sheet:
+- `Company Name` - Stock name
 - `Ticker` - Stock ticker symbol
 - `Portfolio Weight` - Current weight in your portfolio (%)
 - `Bench Weight` - Weight in the benchmark (%)
 - `Sector` - Stock sector
 - `Sector-and-Subsector` - More detailed sector/industry classification
 - `Core Model` - Ranking or scoring of stocks (lower is better)
+- `Lock ticker-and-weight` - Add 'Y' to maintain the current weight for specific tickers
 
-### Constraints Excel Format
-Your Excel file should have sheets with:
+#### Optional Constraints Sheet:
 - `Stocks to Avoid` column - List of tickers to exclude
 - `Emp Sector & Industry` column - Sector constraints to target
 - `Weight` column - Target weight for the sector
+
+## 📊 Ticker Locking Feature
+
+The new "Lock ticker-and-weight" functionality allows you to:
+
+1. Mark specific stocks with 'Y' in the "Lock ticker-and-weight" column
+2. The optimizer will maintain the exact current weight for these stocks
+3. This is useful for positions you don't want to buy or sell
+4. Locked tickers override other constraints (they will be included regardless of Core Model ranking)
 
 ## ⚙️ Optimizer Parameters
 
 | Parameter | Description |
 |-----------|-------------|
-| **Max Positions** | Maximum number of stocks allowed in the portfolio |
+| **Total Positions** | Exact number of positions required in the portfolio |
 | **Target Active Share (%)** | Minimum difference from benchmark (higher = more different) |
 | **Sector Tolerance (%)** | How much sector weights can deviate from targets |
 | **Min/Max Position Size (%)** | Bounds for individual stock position sizes |
@@ -154,12 +165,24 @@ Your Excel file should have sheets with:
 ```
 ActiveShareOptimizer/
 ├── app.py                   # Streamlit web interface
-├── active_share_optimizer_pulp.py   # Optimization engine
+├── run_optimizer.py         # Command-line entry point
+├── optimizer/               # Core optimizer package
+│   ├── __init__.py          # Package exports
+│   ├── main.py              # Main orchestration logic
+│   ├── data/                # Data loading modules
+│   │   ├── __init__.py
+│   │   └── loaders.py       # Functions to load portfolio data
+│   ├── models/              # Optimization models
+│   │   ├── __init__.py
+│   │   └── optimizer.py     # PuLP optimization implementation
+│   └── utils/               # Utility functions
+│       ├── __init__.py
+│       ├── calculations.py  # Active share calculations
+│       └── reporting.py     # Results reporting functions
 ├── requirements.txt         # Python dependencies
 ├── README.md                # This documentation
 ├── inputs/                  # Example input files
-│   ├── active_share_with_core_constraints.csv
-│   └── stocks_to_avoid&sector_constraints.xlsm
+│   └── optimizer_input_file.xlsm   # Consolidated input file with all data
 └── outputs/                 # Generated optimization results
     └── Optimized_Portfolio_PuLP_*.xlsx
 ```
