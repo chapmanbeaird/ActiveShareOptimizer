@@ -56,12 +56,11 @@ def main():
     if not st.session_state.authenticated:
         st.title("Active Share Optimizer")
         password = st.text_input("Enter password to access the application", type="password")
-        if password:
-            if password == "test":
-                st.session_state.authenticated = True
-                st.experimental_rerun()
-            else:
-                st.error("Incorrect password. Please try again.")
+        if password == "test":
+            st.session_state.authenticated = True
+            st.rerun()
+        elif password:  # Only show error if password was entered but was incorrect
+            st.error("Incorrect password. Please try again.")
         return
     
     # Initialize session state for toggle states if they don't exist
