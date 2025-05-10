@@ -56,7 +56,7 @@ def main():
     if not st.session_state.authenticated:
         st.title("Active Share Optimizer")
         password = st.text_input("Enter password to access the application", type="password")
-        if password == "test":
+        if password == "B377erPortfolios!":
             st.session_state.authenticated = True
             st.rerun()
         elif password:  # Only show error if password was entered but was incorrect
