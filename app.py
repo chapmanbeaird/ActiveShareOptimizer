@@ -4,6 +4,7 @@ import io
 import time
 import threading
 import tempfile
+import os
 from optimizer import (
     load_optimizer_input_file,
     optimize_portfolio_pulp,
@@ -56,7 +57,7 @@ def main():
     if not st.session_state.authenticated:
         st.title("Active Share Optimizer")
         password = st.text_input("Enter password to access the application", type="password")
-        if password == "B377erPortfolios!":
+        if password == os.getenv("UNIVERSAL_PASSWORD", st.secrets["general"]["UNIVERSAL_PASSWORD"]):
             st.session_state.authenticated = True
             st.rerun()
         elif password:  # Only show error if password was entered but was incorrect
