@@ -49,6 +49,21 @@ def run_optimizer_thread(data_file_path, num_positions, target_active_share, sec
 def main():
     global optimization_time, optimization_running, optimization_result
     
+    # Password protection
+    if 'authenticated' not in st.session_state:
+        st.session_state.authenticated = False
+    
+    if not st.session_state.authenticated:
+        st.title("Active Share Optimizer")
+        password = st.text_input("Enter password to access the application", type="password")
+        if password:
+            if password == "test":
+                st.session_state.authenticated = True
+                st.experimental_rerun()
+            else:
+                st.error("Incorrect password. Please try again.")
+        return
+    
     # Initialize session state for toggle states if they don't exist
     if 'show_portfolio' not in st.session_state:
         st.session_state.show_portfolio = True
