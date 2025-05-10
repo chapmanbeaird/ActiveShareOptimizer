@@ -5,9 +5,13 @@ Optimization models for the Active Share Optimizer.
 import os
 import pulp
 import numpy as np
-from pulp import PULP_CBC_CMD
+from pulp import COIN_CMD
 from collections import defaultdict
 import pandas as pd
+import shutil
+import pulp, shutil, subprocess, os, sys
+
+
 
 def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60, target_active_share=0.55, 
                             sector_tolerance=0.03, stocks_to_avoid=None, sector_constraints=None, 
@@ -448,21 +452,15 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
    
     # Solve the model
     print(f"\nSolving the optimization model (timeout: {time_limit} seconds)...")
-    
-    # Use the standard PuLP CBC solver interface
-    solver = PULP_CBC_CMD(
-        msg=True,
-        timeLimit=time_limit,
-        options=[
-            'sec', str(time_limit), 
-            'timeMode', 'elapsed', 
-            'ratioGap', '0.0001',
-            'maxN', '100000000',
-            'maxSolutions', '1',
-            'cuts', 'off'
-        ]
-    )
 
+    cbc_path = shutil.which("cbc")
+    if not cbc_path:
+        raise RuntimeError("CBC solver not on PATH ‑ did requirements install fail?")
+    print(f"Using CBC at {cbc_path}")
+
+    solver = COIN_CMD(path=cbc_path,
+                    msg=True,
+                    timeLimit=time_limit)
     model.solve(solver)
     print("Solver status:", pulp.LpStatus[model.status])
 

@@ -15,12 +15,51 @@ An interactive portfolio optimization tool that helps portfolio managers adjust 
 
 ## 📋 Requirements
 
-- Python 3.8 or higher
+- Python 3.8 or higher (Python 3.11 recommended for best compatibility)
 - Python packages: streamlit, pandas, numpy, pulp, coinor-cbc, openpyxl
 
 ## 🚀 Installation
 
-### Simple Installation (Recommended)
+### Using Setup Scripts (Recommended)
+
+We provide setup scripts for both Mac/Linux and Windows that will automatically create a Python 3.11 virtual environment and install all dependencies.
+
+#### For Mac/Linux:
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/ActiveShareOptimizer.git
+   cd ActiveShareOptimizer
+   ```
+
+2. **Run the setup script**
+   ```bash
+   chmod +x setup_mac.sh
+   ./setup_mac.sh
+   ```
+
+3. **Activate the environment**
+   ```bash
+   source activeshare_env_py311/bin/activate
+   ```
+
+#### For Windows:
+1. **Clone the repository**
+   ```cmd
+   git clone https://github.com/yourusername/ActiveShareOptimizer.git
+   cd ActiveShareOptimizer
+   ```
+
+2. **Run the setup script**
+   ```cmd
+   setup_windows.bat
+   ```
+
+3. **Activate the environment**
+   ```cmd
+   activeshare_env_py311\Scripts\activate
+   ```
+
+### Manual Installation
 
 1. **Clone the repository**
    ```bash
@@ -28,23 +67,22 @@ An interactive portfolio optimization tool that helps portfolio managers adjust 
    cd ActiveShareOptimizer
    ```
 
-2. **Create a virtual environment**
+2. **Create a virtual environment with Python 3.11**
    ```bash
    # For Mac/Linux
-   python -m venv venv
-   source venv/bin/activate
+   python3.11 -m venv activeshare_env_py311
+   source activeshare_env_py311/bin/activate
    
    # For Windows
-   python -m venv venv
-   venv\Scripts\activate
+   python3.11 -m venv activeshare_env_py311
+   activeshare_env_py311\Scripts\activate
    ```
 
 3. **Install all dependencies (including the CBC solver)**
    ```bash
+   pip install --upgrade pip
    pip install -r requirements.txt
    ```
-
-   This will automatically install the CBC solver binary for your platform.
 
 ### Alternative Installation: Using Conda
 
@@ -53,11 +91,11 @@ An interactive portfolio optimization tool that helps portfolio managers adjust 
 
 2. **Create and activate a conda environment**
    ```bash
-   conda create -n activeshare python=3.11
+   conda create -n activeshare python=3.11 coin-or-cbc pulp pandas numpy scipy openpyxl xlrd matplotlib -c conda-forge
    conda activate activeshare
    ```
 
-3. **Install dependencies**
+3. **Install remaining dependencies**
    ```bash
    pip install -r requirements.txt
    ```
@@ -128,6 +166,8 @@ The new "Lock ticker-and-weight" functionality allows you to:
 ActiveShareOptimizer/
 ├── app.py                   # Streamlit web interface
 ├── run_optimizer.py         # Command-line entry point
+├── setup_mac.sh             # Setup script for Mac/Linux
+├── setup_windows.bat        # Setup script for Windows
 ├── optimizer/               # Core optimizer package
 │   ├── __init__.py          # Package exports
 │   ├── main.py              # Main orchestration logic
@@ -155,7 +195,8 @@ ActiveShareOptimizer/
 
 1. **Solver issues**
    - The `coinor-cbc` package should automatically install the CBC solver
-   - If you encounter solver issues, try reinstalling with: `pip install --force-reinstall coinor-cbc`
+   - If you encounter solver issues with Python 3.13+, use Python 3.11 instead (see setup scripts)
+   - For compatibility issues, try the conda installation method
 
 2. **Infeasible solution**
    - Try increasing sector tolerance

@@ -12,17 +12,4 @@ xlrd>=2.0.0           # Excel file I/O (xls)
 matplotlib>=3.7.0     # For plotting (if needed)
 scipy>=1.10.0         # Scientific computing library
 
-# CBC Solver Installation Instructions:
-# On Mac: brew install cbc
-# On Windows: Download binary from https://github.com/coin-or/Cbc/releases
-# On Linux: apt-get install coinor-cbc (or equivalent for your distro)
-# Or via conda (any OS): conda install -c conda-forge coincbc
-
-# The following are dependencies of the above packages, but pip will usually handle them automatically:
-# et_xmlfile - for openpyxl
-# python-dateutil - for pandas
-# pytz - for pandas
-# six - common dependency
-# tzdata - timezone data
-
-coinor-cbc>=2.10  # PyPI wheel that bundles cbc.exe / cbc binary for mac & linux
+coinor-cbc>=2.10 ; sys_platform == "win32"
