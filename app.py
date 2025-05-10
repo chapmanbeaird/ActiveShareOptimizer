@@ -75,7 +75,7 @@ def main():
     if 'optimization_data' not in st.session_state:
         st.session_state.optimization_data = None
     
-    st.title("Active Share Optimizer (PuLP)")
+    st.title("Active Share Optimizer")
     st.write("Upload your portfolio file containing stocks, constraints, and locked tickers, then adjust parameters to optimize your portfolio.")
 
     # --- File upload ---

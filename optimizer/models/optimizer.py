@@ -10,6 +10,7 @@ from collections import defaultdict
 import pandas as pd
 import shutil
 import pulp, shutil, subprocess, os, sys
+from optimizer.utils import calculate_active_share
 
 
 
@@ -451,8 +452,9 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
             model += subsector_weight <= target_weight + sector_tolerance * 100
    
     # Solve the model
-        solver = PULP_CBC_CMD(msg=1, timeLimit=time_limit)
-        model.solve(solver)
+    # cbc_path="/opt/homebrew/bin/cbc"
+    solver = PULP_CBC_CMD(msg=1, timeLimit=time_limit)
+    model.solve(solver)
 
     # Get the solver status
     solver_status = pulp.LpStatus[model.status]
@@ -483,11 +485,12 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
                     'core_rank': stock['core_rank']
                 })
     
-    # Calculate the new active share
-    new_active_share = 0
-    for ticker, weight in optimized_portfolio.items():
-        bench_weight = next((stock['bench_weight'] for stock in all_stocks if stock['ticker'] == ticker), 0)
-        new_active_share += abs(weight - bench_weight)
-    new_active_share = new_active_share / 2  # Divide by 2 to get the actual active share
+    # Create benchmark dictionary
+    benchmark = {stock['ticker']: stock['bench_weight'] for stock in all_stocks}
+    
+    # Calculate the new active share using the utility function
+    new_active_share = calculate_active_share(optimized_portfolio, benchmark)
+    
+    print(f"Calculated new active share: {new_active_share:.2f}%")
     
     return optimized_portfolio, added_stocks, new_active_share, solver_status 
