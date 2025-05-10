@@ -5,7 +5,7 @@ Optimization models for the Active Share Optimizer.
 import os
 import pulp
 import numpy as np
-from pulp import COIN_CMD
+from pulp import PULP_CBC_CMD
 from collections import defaultdict
 import pandas as pd
 
@@ -449,32 +449,19 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
     # Solve the model
     print(f"\nSolving the optimization model (timeout: {time_limit} seconds)...")
     
-    # Check multiple possible locations for the CBC solver
-    possible_cbc_paths = [
-        "/opt/homebrew/bin/cbc",  # Mac Homebrew
-        "/usr/local/bin/cbc",     # Mac/Linux standard location
-        "cbc",                    # Available in PATH
-        "C:\\Program Files\\CBC\\bin\\cbc.exe",  # Windows standard location
-    ]
-    
-    cbc_path = None
-    for path in possible_cbc_paths:
-        if os.path.exists(path) or (path == "cbc"):
-            cbc_path = path
-            print(f"Using CBC solver at: {cbc_path}")
-            break
-    
-    if cbc_path is None:
-        raise RuntimeError("CBC solver not found. Please install it and make sure it's in your PATH.")
-
-    # Set strict time limit parameters for the solver
-    solver = COIN_CMD(path=cbc_path, msg=True, timeLimit=time_limit, 
-                    options=['sec', str(time_limit), 
-                            'timeMode', 'elapsed', 
-                            'ratioGap', '0.0001',
-                            'maxN', '100000000',
-                            'maxSolutions', '1',
-                            'cuts', 'off'])
+    # Use the standard PuLP CBC solver interface
+    solver = PULP_CBC_CMD(
+        msg=True,
+        timeLimit=time_limit,
+        options=[
+            'sec', str(time_limit), 
+            'timeMode', 'elapsed', 
+            'ratioGap', '0.0001',
+            'maxN', '100000000',
+            'maxSolutions', '1',
+            'cuts', 'off'
+        ]
+    )
 
     model.solve(solver)
     print("Solver status:", pulp.LpStatus[model.status])

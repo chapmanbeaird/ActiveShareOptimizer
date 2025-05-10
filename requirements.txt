@@ -1,11 +1,12 @@
 # Core requirements for Active Share Optimizer
-streamlit>=1.30.0     # For the web app UI
-pandas>=2.0.0         # Data manipulation and Excel/CSV I/O
-numpy>=1.24.0         # Numerical operations
-pulp>=2.7.0           # Linear programming optimization
+streamlit>=1.18.0     # For the web app UI
+pandas>=1.5.0         # Data manipulation and Excel/CSV I/O
+numpy>=1.20.0         # Numerical operations
+pulp>=2.8             # Linear programming optimization
 
 # For Excel file handling
-openpyxl>=3.1.0       # Excel file I/O (xlsx)
+openpyxl>=3.0.0       # Excel file I/O (xlsx)
+xlrd>=2.0.0           # Excel file I/O (xls)
 
 # Additional dependencies
 matplotlib>=3.7.0     # For plotting (if needed)
@@ -23,3 +24,5 @@ scipy>=1.10.0         # Scientific computing library
 # pytz - for pandas
 # six - common dependency
 # tzdata - timezone data
+
+coinor-cbc>=2.10  # PyPI wheel that bundles cbc.exe / cbc binary for mac & linux

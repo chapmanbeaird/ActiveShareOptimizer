@@ -16,74 +16,37 @@ An interactive portfolio optimization tool that helps portfolio managers adjust 
 ## 📋 Requirements
 
 - Python 3.8 or higher
-- CBC Solver (COIN-OR Branch and Cut solver)
-- Python packages: streamlit, pandas, numpy, pulp, openpyxl
+- Python packages: streamlit, pandas, numpy, pulp, coinor-cbc, openpyxl
 
 ## 🚀 Installation
 
-### Mac Installation
+### Simple Installation (Recommended)
 
-1. **Install Python (if not already installed)**
-   ```bash
-   brew install python@3.11
-   ```
-
-2. **Install CBC Solver**
-   ```bash
-   brew install cbc
-   ```
-
-3. **Clone the repository**
+1. **Clone the repository**
    ```bash
    git clone https://github.com/yourusername/ActiveShareOptimizer.git
    cd ActiveShareOptimizer
    ```
 
-4. **Create a virtual environment (recommended)**
+2. **Create a virtual environment**
    ```bash
+   # For Mac/Linux
    python -m venv venv
    source venv/bin/activate
-   ```
-
-5. **Install Python dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-### Windows Installation
-
-1. **Install Python**
-   - Download and install Python from [python.org](https://www.python.org/downloads/)
-   - Make sure to check "Add Python to PATH" during installation
-
-2. **Install CBC Solver**
-   - Download the latest CBC binary from [GitHub Releases](https://github.com/coin-or/Cbc/releases)
-   - Extract the ZIP file to a location like `C:\Program Files\CBC`
-   - Add the CBC binary directory to your system PATH:
-     - Open "Edit the system environment variables" from Control Panel
-     - Click "Environment Variables"
-     - Edit the "Path" variable and add the CBC bin directory (e.g., `C:\Program Files\CBC\bin`)
-
-3. **Clone the repository**
-   - Download and install Git from [git-scm.com](https://git-scm.com/download/win)
-   - Open Command Prompt or PowerShell and run:
-   ```
-   git clone https://github.com/yourusername/ActiveShareOptimizer.git
-   cd ActiveShareOptimizer
-   ```
-
-4. **Create a virtual environment (recommended)**
-   ```
+   
+   # For Windows
    python -m venv venv
    venv\Scripts\activate
    ```
 
-5. **Install Python dependencies**
-   ```
+3. **Install all dependencies (including the CBC solver)**
+   ```bash
    pip install -r requirements.txt
    ```
 
-### Alternative Installation: Using Conda (Mac or Windows)
+   This will automatically install the CBC solver binary for your platform.
+
+### Alternative Installation: Using Conda
 
 1. **Install Miniconda**
    - Download and install from [docs.conda.io](https://docs.conda.io/en/latest/miniconda.html)
@@ -94,9 +57,8 @@ An interactive portfolio optimization tool that helps portfolio managers adjust 
    conda activate activeshare
    ```
 
-3. **Install CBC solver and dependencies**
+3. **Install dependencies**
    ```bash
-   conda install -c conda-forge coincbc
    pip install -r requirements.txt
    ```
 
@@ -191,10 +153,9 @@ ActiveShareOptimizer/
 
 ### Common Issues
 
-1. **CBC Solver not found**
-   - Make sure CBC is installed and in your system PATH
-   - For Windows, check that you added the CBC bin directory to the PATH
-   - For macOS, verify installation with `brew info cbc`
+1. **Solver issues**
+   - The `coinor-cbc` package should automatically install the CBC solver
+   - If you encounter solver issues, try reinstalling with: `pip install --force-reinstall coinor-cbc`
 
 2. **Infeasible solution**
    - Try increasing sector tolerance
