@@ -42,7 +42,7 @@ def run_optimizer_thread(data_file_path, num_positions, target_active_share, sec
         )
     except Exception as e:
         print(f"Error in optimizer thread: {e}")
-        optimization_result[0] = (None, None, None, None)
+        optimization_result[0] = (None, None, None, None, "Error")
     finally:
         optimization_running = False
 
@@ -89,8 +89,8 @@ def main():
         st.sidebar.markdown(f"### {ticker}")
         min_weight = st.sidebar.slider(
             f"Min Weight for {ticker} (%)",
-            min_value=1.0,
-            max_value=5.0,
+            min_value=0.5,
+            max_value=10.0,
             value=1.0,
             step=0.5,
             key=f"min_{ticker}"
@@ -98,8 +98,8 @@ def main():
         max_weight = st.sidebar.slider(
             f"Max Weight for {ticker} (%)",
             min_value=min_weight,
-            max_value=5.0,
-            value=min(min_weight + 1.0, 5.0),
+            max_value=10.0,
+            value=min(min_weight + 1.0, 10.0),
             step=0.5,
             key=f"max_{ticker}"
         )
@@ -127,7 +127,7 @@ def main():
     ) / 100.0  # Convert to decimal
     
     sector_tolerance = st.sidebar.slider(
-        "Sector Tolerance (%)",
+        "Subsector Tolerance (%)",
         min_value=0.0,
         max_value=10.0,
         value=3.0,
@@ -251,7 +251,7 @@ def main():
                     return
                 
                 # Unpack the results
-                new_portfolio, added_stocks, optimized_active_share, output_file = optimization_result[0]
+                new_portfolio, added_stocks, optimized_active_share, output_file, solver_status = optimization_result[0]
                 
                 # Store optimization results in session state
                 st.session_state.optimization_completed = True
@@ -260,7 +260,8 @@ def main():
                     'added_stocks': added_stocks,
                     'optimized_active_share': optimized_active_share,
                     'output_file': output_file,
-                    'input_path': input_path
+                    'input_path': input_path,
+                    'solver_status': solver_status
                 }
                 
                 # Clear progress displays
@@ -280,10 +281,54 @@ def main():
         optimized_active_share = st.session_state.optimization_data['optimized_active_share']
         output_file = st.session_state.optimization_data['output_file']
         input_path = st.session_state.optimization_data['input_path']
+        solver_status = st.session_state.optimization_data.get('solver_status', 'Unknown')
         
         # Display the results
-        if optimized_active_share is None:
-            st.error("No optimal solution found with the given constraints.")
+        if solver_status != 'Optimal':
+            st.error(f"Optimization status: {solver_status}")
+            st.warning("""
+            ### The optimization problem is infeasible with the current constraints.
+            
+            **Try the following to find a feasible solution:**
+            - Reduce the target active share
+            - Lower the weight of forced positions 
+            - Use a wider range for forced position weights
+            - Reduce the number of locked tickers
+            - Relax sector constraints
+            - Use continuous weights instead of increments
+            """
+            )
+        elif len(new_portfolio) > 0 and len(new_portfolio) <= 5:  # Likely a fallback solution with just locked tickers
+            # Get the original active share from the data
+            _, original_active_share, _, _, _ = load_optimizer_input_file(input_path)
+            
+            st.warning(f"""
+            ### Fallback Solution with Locked Tickers Only
+            
+            The optimizer could not find a feasible solution with all constraints.
+            A fallback portfolio containing only the locked tickers has been created.
+            
+            **Current constraints that might be causing infeasibility:**
+            - Target Active Share: {target_active_share*100:.1f}%
+            - Number of positions: {num_positions}
+            - Locked tickers: {len(new_portfolio)}
+            - Sector constraints with tolerance: {sector_tolerance*100:.1f}%
+            - Using increments: {increment is not None}
+            """
+            )
+            
+            st.write(f"Original Active Share: {original_active_share:.2f}%")
+            st.write(f"Fallback Active Share: {optimized_active_share:.2f}%")
+            st.write(f"This is a partial solution with only {len(new_portfolio)} positions instead of the target {num_positions}.")
+            
+            # Display the output file - moved to top before checkboxes
+            with open(output_file, "rb") as f:
+                st.download_button(
+                    label="Download Fallback Portfolio (Locked Tickers Only)",
+                    data=f,
+                    file_name=f"Fallback_Portfolio_Locked_Tickers.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
         else:
             # Get the original active share from the data
             _, original_active_share, _, _, _ = load_optimizer_input_file(input_path)
@@ -303,138 +348,144 @@ def main():
                     file_name=f"Optimized_Portfolio.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
-            
-            # Add toggles for detailed information with session state
-            st.session_state.show_portfolio = st.checkbox("Show Full Portfolio", value=st.session_state.show_portfolio)
-            st.session_state.show_additions = st.checkbox("Show New Additions", value=st.session_state.show_additions)
-            st.session_state.show_sectors = st.checkbox("Show Sector Breakdown", value=st.session_state.show_sectors)
+        
             
             # Display portfolio holdings
-            if st.session_state.show_portfolio:
-                st.subheader("Optimized Portfolio Holdings")
-                
-                # Convert portfolio to DataFrame for better display
-                portfolio_df = pd.DataFrame(list(new_portfolio.items()), columns=["Ticker", "Weight (%)"])
-                portfolio_df = portfolio_df.sort_values(by="Weight (%)", ascending=False)
-                
-                # Display as a table with formatting - removed rounding
-                st.dataframe(
-                    portfolio_df,
-                    column_config={
-                        "Ticker": st.column_config.TextColumn("Ticker"),
-                        "Weight (%)": st.column_config.NumberColumn(
-                            "Weight (%)",
-                            help="Position weight as a percentage"
-                        )
-                    },
-                    hide_index=True,
-                    use_container_width=True
-                )
+            st.subheader("Optimized Portfolio Holdings")
+            
+            # Convert portfolio to DataFrame for better display
+            portfolio_df = pd.DataFrame(list(new_portfolio.items()), columns=["Ticker", "Weight (%)"])
+            portfolio_df = portfolio_df.sort_values(by="Weight (%)", ascending=False)
+            
+            # Display as a table with formatting - removed rounding
+            st.dataframe(
+                portfolio_df,
+                column_config={
+                    "Ticker": st.column_config.TextColumn("Ticker"),
+                    "Weight (%)": st.column_config.NumberColumn(
+                        "Weight (%)",
+                        help="Position weight as a percentage"
+                    )
+                },
+                hide_index=True,
+                use_container_width=True
+            )
             
             # Display sector breakdown
-            if st.session_state.show_sectors:
-                st.subheader("Sector Breakdown")
+            st.subheader("Sector Breakdown")
+            
+            # Get the original data to extract sector information
+            stocks_data, _, _, _, _ = load_optimizer_input_file(input_path)
+            
+            # Create a mapping of tickers to sectors
+            ticker_to_sector = {}
+            ticker_to_subsector = {}
+            for _, row in stocks_data.iterrows():
+                ticker = row['Ticker']
+                if pd.notna(ticker):
+                    ticker_to_sector[ticker] = row.get('Sector', 'Unknown')
+                    ticker_to_subsector[ticker] = row.get('Sector-and-Subsector', 'Unknown')
+            
+            # Calculate sector weights in the optimized portfolio
+            sector_weights = {}
+            subsector_weights = {}
+            
+            for ticker, weight in new_portfolio.items():
+                sector = ticker_to_sector.get(ticker, 'Unknown')
+                subsector = ticker_to_subsector.get(ticker, 'Unknown')
                 
-                # Get the original data to extract sector information
-                stocks_data, _, _, _, _ = load_optimizer_input_file(input_path)
+                if sector not in sector_weights:
+                    sector_weights[sector] = 0
+                sector_weights[sector] += weight
                 
-                # Create a mapping of tickers to sectors
-                ticker_to_sector = {}
-                ticker_to_subsector = {}
-                for _, row in stocks_data.iterrows():
-                    ticker = row['Ticker']
-                    if pd.notna(ticker):
-                        ticker_to_sector[ticker] = row.get('Sector', 'Unknown')
-                        ticker_to_subsector[ticker] = row.get('Sector-and-Subsector', 'Unknown')
-                
-                # Calculate sector weights in the optimized portfolio
-                sector_weights = {}
-                subsector_weights = {}
-                
-                for ticker, weight in new_portfolio.items():
-                    sector = ticker_to_sector.get(ticker, 'Unknown')
-                    subsector = ticker_to_subsector.get(ticker, 'Unknown')
-                    
-                    if sector not in sector_weights:
-                        sector_weights[sector] = 0
-                    sector_weights[sector] += weight
-                    
-                    if subsector not in subsector_weights:
-                        subsector_weights[subsector] = 0
-                    subsector_weights[subsector] += weight
-                
-                # Convert to DataFrames
-                sector_df = pd.DataFrame(list(sector_weights.items()), columns=["Sector", "Weight (%)"])
-                sector_df = sector_df.sort_values(by="Weight (%)", ascending=False)
-                
-                subsector_df = pd.DataFrame(list(subsector_weights.items()), columns=["Subsector", "Weight (%)"])
-                subsector_df = subsector_df.sort_values(by="Weight (%)", ascending=False)
-                
-                # Display sector breakdown - removed rounding
-                st.write("By Sector:")
-                st.dataframe(
-                    sector_df,
-                    column_config={
-                        "Sector": st.column_config.TextColumn("Sector"),
-                        "Weight (%)": st.column_config.NumberColumn("Weight (%)")
-                    },
-                    hide_index=True,
-                    use_container_width=True
-                )
-                
-                # Display subsector breakdown - removed rounding
-                st.write("By Subsector:")
-                st.dataframe(
-                    subsector_df,
-                    column_config={
-                        "Subsector": st.column_config.TextColumn("Subsector"),
-                        "Weight (%)": st.column_config.NumberColumn("Weight (%)")
-                    },
-                    hide_index=True,
-                    use_container_width=True
-                )
+                if subsector not in subsector_weights:
+                    subsector_weights[subsector] = 0
+                subsector_weights[subsector] += weight
+            
+            # Convert to DataFrames
+            sector_df = pd.DataFrame(list(sector_weights.items()), columns=["Sector", "Weight (%)"])
+            sector_df = sector_df.sort_values(by="Weight (%)", ascending=False)
+            
+            subsector_df = pd.DataFrame(list(subsector_weights.items()), columns=["Subsector", "Weight (%)"])
+            subsector_df = subsector_df.sort_values(by="Weight (%)", ascending=False)
+            
+            # Display sector breakdown - removed rounding
+            st.write("By Sector:")
+            st.dataframe(
+                sector_df,
+                column_config={
+                    "Sector": st.column_config.TextColumn("Sector"),
+                    "Weight (%)": st.column_config.NumberColumn("Weight (%)")
+                },
+                hide_index=True,
+                use_container_width=True
+            )
+            
+            # Display subsector breakdown - removed rounding
+            st.write("By Subsector:")
+            st.dataframe(
+                subsector_df,
+                column_config={
+                    "Subsector": st.column_config.TextColumn("Subsector"),
+                    "Weight (%)": st.column_config.NumberColumn("Weight (%)")
+                },
+                hide_index=True,
+                use_container_width=True
+            )
             
             # Display new additions
-            if added_stocks and st.session_state.show_additions:
-                st.subheader("New Additions to Portfolio")
+            st.subheader("New Additions to Portfolio")
+            
+            # Extract ticker and weight information from added_stocks
+            new_additions = []
+            for stock in added_stocks:
+                ticker = stock['ticker']
+                weight = stock.get('new_weight', new_portfolio.get(ticker, 0))
+                sector = stock.get('sector', '')
+                subsector = stock.get('subsector', '')
+                core_rank = stock.get('core_rank', 'N/A')
+                bench_weight = stock.get('bench_weight', 0)
                 
-                # Extract ticker and weight information from added_stocks
-                new_additions = []
-                for stock in added_stocks:
-                    ticker = stock['ticker']
-                    weight = stock.get('new_weight', new_portfolio.get(ticker, 0))
-                    sector = stock.get('sector', '')
-                    subsector = stock.get('subsector', '')
-                    core_rank = stock.get('core_rank', 'N/A')
-                    bench_weight = stock.get('bench_weight', 0)
-                    
-                    new_additions.append({
-                        "Ticker": ticker,
-                        "Weight (%)": weight,
-                        "Sector": sector,
-                        "Subsector": subsector,
-                        "Core Rank": core_rank,
-                        "Benchmark Weight (%)": bench_weight
-                    })
-                
-                # Convert to DataFrame and display
-                additions_df = pd.DataFrame(new_additions)
-                additions_df = additions_df.sort_values(by=["Sector", "Weight (%)"], ascending=[True, False])
-                
-                # Display as a table with formatting - removed rounding
-                st.dataframe(
-                    additions_df,
-                    column_config={
-                        "Ticker": st.column_config.TextColumn("Ticker"),
-                        "Weight (%)": st.column_config.NumberColumn("Weight (%)"),
-                        "Sector": st.column_config.TextColumn("Sector"),
-                        "Subsector": st.column_config.TextColumn("Subsector"),
-                        "Core Rank": st.column_config.NumberColumn("Core Rank"),
-                        "Benchmark Weight (%)": st.column_config.NumberColumn("Benchmark Weight (%)")
-                    },
-                    hide_index=True,
-                    use_container_width=True
-                )
+                new_additions.append({
+                    "Ticker": ticker,
+                    "Weight (%)": weight,
+                    "Benchmark Weight (%)": bench_weight,
+                    "Sector": sector,
+                    "Subsector": subsector,
+                    "Core Rank": core_rank
+                })
+            
+            # Convert to DataFrame and display
+            additions_df = pd.DataFrame(new_additions)
+            
+            # Find a column that might contain sector information (case-insensitive)
+            sector_col = None
+            for col in additions_df.columns:
+                if 'sector' in col.lower() and not additions_df[col].isna().all():
+                    sector_col = col
+                    break
+            
+            # Sort the dataframe based on available columns
+            if sector_col and len(additions_df) > 0:
+                additions_df = additions_df.sort_values(by=[sector_col, "Weight (%)"], ascending=[True, False])
+            elif len(additions_df) > 0:
+                # Fallback: sort only by weight if no sector column is found
+                additions_df = additions_df.sort_values(by="Weight (%)", ascending=False)
+            
+            # Display as a table with formatting - removed rounding
+            st.dataframe(
+                additions_df,
+                column_config={
+                    "Ticker": st.column_config.TextColumn("Ticker"),
+                    "Weight (%)": st.column_config.NumberColumn("Weight (%)"),
+                    "Sector": st.column_config.TextColumn("Sector"),
+                    "Subsector": st.column_config.TextColumn("Subsector"),
+                    "Core Rank": st.column_config.NumberColumn("Core Rank"),
+                    "Benchmark Weight (%)": st.column_config.NumberColumn("Benchmark Weight (%)")
+                },
+                hide_index=True,
+                use_container_width=True
+            )
 
 if __name__ == "__main__":
     main()

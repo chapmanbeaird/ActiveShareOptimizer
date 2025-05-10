@@ -150,5 +150,4 @@ def load_optimizer_input_file(file_path):
         print(f"Warning: Could not load constraints from separate sheet: {e}")
         stocks_to_avoid = []
         sector_constraints = {}
-    print (f"Locked tickers: {locked_tickers}")
     return data, total_active_share, stocks_to_avoid, sector_constraints, locked_tickers 

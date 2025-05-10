@@ -36,6 +36,7 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
     - optimized_portfolio: Dictionary of ticker to weight for the optimized portfolio
     - added_stocks: List of stocks added to the portfolio
     - new_active_share: The new Active Share after optimization
+    - solver_status: The status of the solver after optimization
     """
     # Initialize variables
     if stocks_to_avoid is None:
@@ -46,6 +47,18 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
         forced_positions = {}
     if locked_tickers is None:
         locked_tickers = {}
+        
+    # If using increments, round locked ticker weights to the nearest increment
+    if increment is not None and locked_tickers:
+        rounded_locked_tickers = {}
+        for ticker, weight in locked_tickers.items():
+            # Round the weight to the nearest increment
+            rounded_weight = round(round(weight / increment) * increment, 4)
+            rounded_locked_tickers[ticker] = rounded_weight
+            print(f"Rounding locked ticker {ticker} from {weight}% to nearest increment: {rounded_weight}%")
+        
+        # Replace original locked tickers with rounded ones
+        locked_tickers = rounded_locked_tickers
         
     # Automatically add locked tickers to forced positions with exact weights
     for ticker, locked_weight in locked_tickers.items():
@@ -245,8 +258,18 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
         # Create a set of all possible increments, including those needed for forced positions
         all_increments = set(standard_increments)
         
+        # Add any special increments needed for locked tickers
+        for ticker, locked_weight in locked_tickers.items():
+            # Add the exact weight of the locked ticker to the set of increments
+            all_increments.add(round(locked_weight, 4))
+            print(f"Adding exact weight {locked_weight}% for locked ticker {ticker} to available increments")
+        
         # Add any special increments needed for forced positions
         for ticker, (minp, maxp) in forced_positions.items():
+            # Skip if this is a locked ticker - already handled above
+            if ticker in locked_tickers:
+                continue
+                
             # If the forced position has exact bounds (minp == maxp), add that specific value
             if minp == maxp:
                 all_increments.add(round(minp, 4))
@@ -387,7 +410,20 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
     model += pulp.lpSum(weight[i] for i in range(len(all_stocks))) == 100
     
     # Constraint: Total number of positions must be exactly equal to num_positions
-    model += pulp.lpSum(include[i] for i in range(len(all_stocks))) == num_positions
+    # Count locked tickers separately to provide more flexibility
+    if locked_tickers:
+        # Count how many locked tickers we have
+        num_locked = len(locked_tickers)
+        print(f"Adjusting position count constraint to account for {num_locked} locked tickers")
+        
+        # Get indices of non-locked tickers
+        non_locked_indices = [i for i in range(len(all_stocks)) if all_stocks[i]['ticker'] not in locked_tickers]
+        
+        # The constraint applies only to non-locked tickers
+        model += pulp.lpSum(include[i] for i in non_locked_indices) == num_positions - num_locked
+    else:
+        # No locked tickers, use the original constraint
+        model += pulp.lpSum(include[i] for i in range(len(all_stocks))) == num_positions
 
     # Constraint: Filter out stocks in the stocks_to_avoid list
     for ticker in stocks_to_avoid:
@@ -433,63 +469,29 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
 
     # Set strict time limit parameters for the solver
     solver = COIN_CMD(path=cbc_path, msg=True, timeLimit=time_limit, 
-                      options=['sec', str(time_limit), 
-                              'timeMode', 'elapsed', 
-                              'ratioGap', '0.0001',
-                              'maxN', '100000000',
-                              'maxSolutions', '1',
-                              'cuts', 'off'])
+                    options=['sec', str(time_limit), 
+                            'timeMode', 'elapsed', 
+                            'ratioGap', '0.0001',
+                            'maxN', '100000000',
+                            'maxSolutions', '1',
+                            'cuts', 'off'])
 
     model.solve(solver)
     print("Solver status:", pulp.LpStatus[model.status])
 
+    # Store the solver status to return it
+    solver_status = pulp.LpStatus[model.status]
 
     # Check if the model was solved successfully
     if pulp.LpStatus[model.status] != 'Optimal':
         print(f"Model status: {pulp.LpStatus[model.status]}")
         print("Could not find an optimal solution with the given constraints.")
-        
-        # If we have locked tickers, create a fallback solution with just those tickers
-        if locked_tickers:
-            print("Creating fallback solution with locked tickers...")
-            fallback_portfolio = {}
-            fallback_added_stocks = []
-            
-            # Add locked tickers to the fallback portfolio
-            for ticker, weight in locked_tickers.items():
-                fallback_portfolio[ticker] = weight
                 
-                # Check if this is a new position
-                ticker_data = stocks_data[stocks_data['Ticker'] == ticker]
-                if not ticker_data.empty and ticker_data.iloc[0]['Portfolio Weight'] == 0:
-                    stock_data = ticker_data.iloc[0]
-                    fallback_added_stocks.append({
-                        'ticker': ticker,
-                        'sector': stock_data['Sector'],
-                        'subsector': stock_data['Sector-and-Subsector'],
-                        'bench_weight': stock_data['Bench Weight'],
-                        'core_rank': stock_data['Core Model'],
-                        'weight': weight
-                    })
-            
-            # Calculate the active share for this fallback portfolio
-            fallback_active_share = 0
-            for i in range(len(all_stocks)):
-                ticker = all_stocks[i]['ticker']
-                port_weight = fallback_portfolio.get(ticker, 0)
-                bench_weight = all_stocks[i]['bench_weight']
-                fallback_active_share += abs(port_weight - bench_weight)
-            
-            fallback_active_share = fallback_active_share / 2
-            print(f"Fallback portfolio with locked tickers has Active Share: {fallback_active_share:.2f}%")
-            
-            return fallback_portfolio, fallback_added_stocks, fallback_active_share
-        
         # If no locked tickers or fallback solution, return empty results
         optimized_portfolio = {}
         added_stocks = []
         new_active_share = None
-        return optimized_portfolio, added_stocks, new_active_share
+        return optimized_portfolio, added_stocks, new_active_share, solver_status
 
     # Create the optimized portfolio
     optimized_portfolio = {}
@@ -613,4 +615,4 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
         else:
             print(f"{subsector}: {old_weight:.2f}% → {new_weight:.2f}% (Benchmark: {bench_weight:.2f}%, Δ: {new_weight - old_weight:.2f}%)")
 
-    return optimized_portfolio, added_stocks, new_active_share 
+    return optimized_portfolio, added_stocks, new_active_share, solver_status 

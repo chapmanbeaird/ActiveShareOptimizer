@@ -44,6 +44,7 @@ def main(
     - added_stocks: List of stocks added to the portfolio
     - optimized_active_share: The new Active Share after optimization
     - output_file: Path to the saved Excel file with results
+    - solver_status: Status of the solver after optimization
     """
         # Load all data from single input file
     stocks_data, total_active_share, stocks_to_avoid, sector_constraints, locked_tickers = load_optimizer_input_file(data_file_path)
@@ -65,7 +66,7 @@ def main(
         print("Not enforcing position increment size (using continuous weights)")
         
     # Run the optimizer
-    new_portfolio, added_stocks, optimized_active_share = optimize_portfolio_pulp(
+    new_portfolio, added_stocks, optimized_active_share, solver_status = optimize_portfolio_pulp(
         stocks_data, 
         original_active_share=total_active_share,
         num_positions=num_positions,
@@ -349,7 +350,7 @@ def main(
         output_timestamp=timestamp
     )
 
-    return new_portfolio, added_stocks, optimized_active_share, output_file
+    return new_portfolio, added_stocks, optimized_active_share, output_file, solver_status
 
 if __name__ == "__main__":
     main() 
