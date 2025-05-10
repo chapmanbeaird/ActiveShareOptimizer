@@ -12,4 +12,5 @@ xlrd>=2.0.0           # Excel file I/O (xls)
 matplotlib>=3.7.0     # For plotting (if needed)
 scipy>=1.10.0         # Scientific computing library
 
-coinor-cbc>=2.10
+# Solvers
+pulp-solver>=1.0.0    # Additional solvers for PuLP

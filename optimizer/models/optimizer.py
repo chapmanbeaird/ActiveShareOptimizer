@@ -5,7 +5,7 @@ Optimization models for the Active Share Optimizer.
 import os
 import pulp
 import numpy as np
-from pulp import COIN_CMD
+from pulp import PULP_CBC_CMD
 from collections import defaultdict
 import pandas as pd
 import shutil
@@ -451,153 +451,43 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
             model += subsector_weight <= target_weight + sector_tolerance * 100
    
     # Solve the model
-    print(f"\nSolving the optimization model (timeout: {time_limit} seconds)...")
-
-    cbc_path = shutil.which("cbc")
-    if not cbc_path:
-        raise RuntimeError("CBC solver not on PATH ‑ did requirements install fail?")
-    print(f"Using CBC at {cbc_path}")
-
-    solver = COIN_CMD(path=cbc_path,
-                    msg=True,
-                    timeLimit=time_limit)
+    solver = PULP_CBC_CMD(msg=1, timeLimit=time_limit)
     model.solve(solver)
-    print("Solver status:", pulp.LpStatus[model.status])
-
-    # Store the solver status to return it
+    
+    # Get the solver status
     solver_status = pulp.LpStatus[model.status]
-
-    # Check if the model was solved successfully
-    if pulp.LpStatus[model.status] != 'Optimal':
-        print(f"Model status: {pulp.LpStatus[model.status]}")
-        print("Could not find an optimal solution with the given constraints.")
-                
-        # If no locked tickers or fallback solution, return empty results
-        optimized_portfolio = {}
-        added_stocks = []
-        new_active_share = None
-        return optimized_portfolio, added_stocks, new_active_share, solver_status
-
-    # Create the optimized portfolio
+    print(f"Solver status: {solver_status}")
+    
+    if solver_status != 'Optimal':
+        print("Warning: Solver did not find an optimal solution!")
+        return {}, [], 0, solver_status
+    
+    # Extract the solution
     optimized_portfolio = {}
     added_stocks = []
     
-    # Process the optimization results
-    for i in range(len(all_stocks)):
-        if pulp.value(include[i]) > 0.5:  # If the stock is included (binary value close to 1)
-            ticker = all_stocks[i]['ticker']
-            new_weight = pulp.value(weight[i])
+    for i, stock in enumerate(all_stocks):
+        if include[i].value() > 0.5:  # If stock is included
+            ticker = stock['ticker']
+            weight_value = weight[i].value()
+            optimized_portfolio[ticker] = weight_value
             
-            # Round to 4 decimal places for display
-            optimized_portfolio[ticker] = round(new_weight, 4)
-            
-            # If this is a new stock (not in the original portfolio) and not a locked ticker
-            if all_stocks[i]['in_portfolio'] == 0 and ticker not in locked_tickers:
+            # If this stock wasn't in the original portfolio, add it to added_stocks
+            if not stock['in_portfolio']:
                 added_stocks.append({
                     'ticker': ticker,
-                    'sector': all_stocks[i]['sector'],
-                    'subsector': all_stocks[i]['subsector'],
-                    'bench_weight': all_stocks[i]['bench_weight'],
-                    'core_rank': all_stocks[i]['core_rank'],
-                    'new_weight': new_weight,
-                    'active_share_impact': abs(new_weight - all_stocks[i]['bench_weight']) / 2
+                    'sector': stock['sector'],
+                    'subsector': stock['subsector'],
+                    'new_weight': weight_value,
+                    'bench_weight': stock['bench_weight'],
+                    'core_rank': stock['core_rank']
                 })
     
-    # Override the weights for locked tickers with their original weights
-    for ticker, locked_weight in locked_tickers.items():
-        if ticker not in optimized_portfolio:
-            print(f"Adding locked ticker {ticker} to portfolio with weight: {locked_weight}%")
-            # Also add to the list of added stocks if it wasn't in the original portfolio
-            ticker_data = stocks_data[stocks_data['Ticker'] == ticker]
-            if not ticker_data.empty and ticker_data.iloc[0]['Portfolio Weight'] == 0:
-                stock_data = ticker_data.iloc[0]
-                added_stocks.append({
-                    'ticker': ticker,
-                    'sector': stock_data['Sector'],
-                    'subsector': stock_data['Sector-and-Subsector'],
-                    'bench_weight': stock_data['Bench Weight'],
-                    'core_rank': stock_data['Core Model'],
-                    'weight': locked_weight
-                })
-        else:
-            print(f"Overriding weight for locked ticker {ticker}: {optimized_portfolio[ticker]}% → {locked_weight}%")
-        optimized_portfolio[ticker] = locked_weight
-    
-    # Calculate the new Active Share
+    # Calculate the new active share
     new_active_share = 0
-    for i in range(len(all_stocks)):
-        ticker = all_stocks[i]['ticker']
-        port_weight = optimized_portfolio.get(ticker, 0)
-        bench_weight = all_stocks[i]['bench_weight']
-        new_active_share += abs(port_weight - bench_weight)
-        
-    new_active_share = new_active_share / 2
-    
-    print(f"\nCalculated Active Share in optimizer: {new_active_share:.2f}%")
-    
-    # Calculate new sector and subsector weights
-    new_sector_weights = defaultdict(float)
-    new_subsector_weights = defaultdict(float)
     for ticker, weight in optimized_portfolio.items():
-        # Find the sector and subsector for this ticker
-        for stock in all_stocks:
-            if stock['ticker'] == ticker:
-                sector = stock['sector']
-                subsector = stock['subsector']
-                if sector and not pd.isna(sector):
-                    new_sector_weights[sector] += weight
-                if subsector and not pd.isna(subsector):
-                    new_subsector_weights[subsector] += weight
-                break
+        bench_weight = next((stock['bench_weight'] for stock in all_stocks if stock['ticker'] == ticker), 0)
+        new_active_share += abs(weight - bench_weight)
+    new_active_share = new_active_share / 2  # Divide by 2 to get the actual active share
     
-    core_rank_counts = defaultdict(int)
-    core_rank_weights = defaultdict(float)
-
-    for ticker, weight in optimized_portfolio.items():
-        # Find the core rank for this ticker
-        for stock in all_stocks:
-            if stock['ticker'] == ticker:
-                rank = stock['core_rank']
-                core_rank_counts[rank] += 1
-                core_rank_weights[rank] += weight
-                break
-    
-    # Final portfolio stats
-    print("\nOptimized Portfolio Summary:")
-    print(f"Original Active Share: {original_active_share:.2f}%")
-    print(f"Optimized Active Share: {new_active_share:.2f}%")
-    print(f"Improvement: {original_active_share - new_active_share:.2f}%")
-    print(f"Final number of positions: {len(optimized_portfolio)}")
-    print(f"New positions added: {len(added_stocks)}")
-    
-    # Print core rank distribution
-    print("\nCore Rank Distribution:")
-    for rank in sorted(core_rank_counts.keys()):
-        print(f"Core Rank {rank}: {core_rank_counts[rank]} stocks ({core_rank_weights[rank]:.2f}%)")
-    
-    # List new positions by subsector
-    if added_stocks:
-        print("\nAdded positions by sector:")
-        by_subsector = defaultdict(list)
-        for stock in added_stocks:
-            by_subsector[stock['subsector']].append(stock)
-            
-        for subsector, stocks in by_subsector.items():
-            print(f"\n{subsector}:")
-            for stock in stocks:
-                print(f"  {stock['ticker']}: {stock['new_weight']:.2f}% (Benchmark: {stock['bench_weight']:.2f}%, Core Rank: {stock['core_rank']})")
-    
-    # Print sector-and-subsector changes
-    print("\nSector-and-Subsector Analysis:")
-    for subsector in sorted(set(current_sector_weights.keys()) | set(new_subsector_weights.keys())):
-        old_weight = current_sector_weights.get(subsector, 0)
-        new_weight = new_subsector_weights.get(subsector, 0)
-        bench_weight = benchmark_sector_weights.get(subsector, 0)
-        constraint_weight = sector_constraints.get(subsector, None)
-        
-        if constraint_weight is not None:
-            print(f"{subsector}: {old_weight:.2f}% → {new_weight:.2f}% (Target: {constraint_weight:.2f}%, Δ from target: {new_weight - constraint_weight:.2f}%)")
-        else:
-            print(f"{subsector}: {old_weight:.2f}% → {new_weight:.2f}% (Benchmark: {bench_weight:.2f}%, Δ: {new_weight - old_weight:.2f}%)")
-
     return optimized_portfolio, added_stocks, new_active_share, solver_status 
