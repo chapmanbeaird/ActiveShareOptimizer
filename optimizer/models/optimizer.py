@@ -451,9 +451,9 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
             model += subsector_weight <= target_weight + sector_tolerance * 100
    
     # Solve the model
-    solver = PULP_CBC_CMD(msg=1, timeLimit=time_limit)
-    model.solve(solver)
-    
+        solver = PULP_CBC_CMD(msg=1, timeLimit=time_limit)
+        model.solve(solver)
+
     # Get the solver status
     solver_status = pulp.LpStatus[model.status]
     print(f"Solver status: {solver_status}")
