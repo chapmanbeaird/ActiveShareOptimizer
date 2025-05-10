@@ -1,0 +1,51 @@
+# Virtual environments
+venv/
+activeshare_env/
+activeshare_env_py311/
+.venv/
+env/
+ENV/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Jupyter notebooks
+.ipynb_checkpoints
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Streamlit
+.streamlit/
+
+# Output files
+outputs/*.xlsx
+outputs/*.csv
+outputs/*.xls
+
+# Logs
+*.log
+
+# Local configuration
+.env
+.env.local
+
+# Database
+*.db
+*.sqlite3
+
+# Temporary files
+tmp/
+temp/ 
