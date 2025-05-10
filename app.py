@@ -57,7 +57,19 @@ def main():
     if not st.session_state.authenticated:
         st.title("Active Share Optimizer")
         password = st.text_input("Enter password to access the application", type="password")
-        if password == os.getenv("UNIVERSAL_PASSWORD", st.secrets["general"]["UNIVERSAL_PASSWORD"]):
+        
+        # Try to get password from environment variable first
+        expected_password = os.getenv("UNIVERSAL_PASSWORD")
+        
+        # If not in environment, try to get from secrets
+        if expected_password is None:
+            try:
+                expected_password = st.secrets["general"]["UNIVERSAL_PASSWORD"]
+            except (KeyError, AttributeError):
+                st.error("Application configuration error. Please contact the administrator.")
+                return
+        
+        if password == expected_password:
             st.session_state.authenticated = True
             st.rerun()
         elif password:  # Only show error if password was entered but was incorrect
