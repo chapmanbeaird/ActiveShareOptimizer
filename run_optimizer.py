@@ -36,7 +36,7 @@ if __name__ == "__main__":
     increment = None if args.continuous_weights else args.increment
     
     # Run the optimizer
-    new_portfolio, added_stocks, optimized_active_share, output_file = main(
+    new_portfolio, added_stocks, optimized_active_share, output_file, solver_status, original_active_share = main(
         data_file_path=args.data_file,
         num_positions=args.num_positions,
         target_active_share=args.target_active_share,
@@ -47,11 +47,14 @@ if __name__ == "__main__":
         time_limit=args.time_limit,
         increment=increment
     )
-    
+
     if optimized_active_share is None:
-        print("\nNo optimal solution found. Check the output file for details.")
+        print(f"\nNo optimal solution found (solver status: {solver_status}).")
+        print("Check the output file for details.")
     else:
         print(f"\nOptimization complete!")
-        print(f"Original Active Share: {args.target_active_share * 100:.2f}%")
+        print(f"Original Active Share: {original_active_share:.2f}%")
         print(f"Optimized Active Share: {optimized_active_share:.2f}%")
+        improvement = original_active_share - optimized_active_share
+        print(f"Improvement: {improvement:.2f}% ({improvement/original_active_share*100:.1f}% reduction)")
         print(f"Results saved to: {output_file}") 

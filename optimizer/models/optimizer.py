@@ -5,7 +5,7 @@ Optimization models for the Active Share Optimizer.
 import os
 import pulp
 import numpy as np
-from pulp import PULP_CBC_CMD
+from pulp import PULP_CBC_CMD, COIN_CMD
 from collections import defaultdict
 import pandas as pd
 import shutil
@@ -404,8 +404,7 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
     # Constraint: Active Share should not be lower than target_active_share 
     # Active Share = 0.5 * total_abs_diff
     print(f"Setting minimum Active Share constraint to: {target_active_share * 100:.2f}%")
-    # Since weights are already in percentages, target_active_share needs to be multiplied by 100
-    # to be in the same scale as weights (e.g., 0.55 * 100 = 55%)
+    
     model += 0.5 * total_abs_diff >= target_active_share * 100
     
     # Objective function: minimize active share while maintaining the constraint
@@ -450,19 +449,43 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
             subsector_weight = pulp.lpSum(weight[i] for i in subsector_to_stocks[subsector])
             model += subsector_weight >= target_weight - sector_tolerance * 100
             model += subsector_weight <= target_weight + sector_tolerance * 100
-   
-    # Solve the model
-    # cbc_path="/opt/homebrew/bin/cbc"
-    solver = PULP_CBC_CMD(msg=1, timeLimit=time_limit)
-    model.solve(solver)
+
+    # Solve the model using portable solver detection
+    # Try PULP_CBC_CMD first (auto-detects solver path), fall back to common locations
+    solver = None
+    try:
+        solver = PULP_CBC_CMD(msg=True, timeLimit=time_limit)
+        model.solve(solver)
+    except Exception as e:
+        print(f"PULP_CBC_CMD failed: {e}, trying fallback paths...")
+        # Try common CBC locations
+        cbc_paths = [
+            "/opt/homebrew/bin/cbc",  # macOS Homebrew ARM
+            "/usr/local/bin/cbc",      # macOS Homebrew Intel / Linux
+            "/usr/bin/cbc",            # Linux system
+            shutil.which("cbc"),       # System PATH
+        ]
+        for cbc_path in cbc_paths:
+            if cbc_path and os.path.exists(cbc_path):
+                try:
+                    solver = COIN_CMD(path=cbc_path, msg=True, timeLimit=time_limit)
+                    model.solve(solver)
+                    break
+                except Exception:
+                    continue
+        if solver is None:
+            raise RuntimeError("Could not find CBC solver. Install with: pip install pulp[cbc]")
 
     # Get the solver status
     solver_status = pulp.LpStatus[model.status]
     print(f"Solver status: {solver_status}")
     
-    if solver_status != 'Optimal':
-        print("Warning: Solver did not find an optimal solution!")
-        return {}, [], 0, solver_status
+    if solver_status not in ['Optimal', 'Feasible']:
+        print(f"Warning: Solver did not find a solution (status: {solver_status})")
+        return {}, [], None, solver_status
+
+    if solver_status == 'Feasible':
+        print("Note: Solver found a feasible but not proven optimal solution (may be due to time limit)")
     
     # Extract the solution
     optimized_portfolio = {}

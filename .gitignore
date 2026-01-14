@@ -49,3 +49,5 @@ outputs/*.xls
 # Temporary files
 tmp/
 temp/ 
+
+CLAUDE.md

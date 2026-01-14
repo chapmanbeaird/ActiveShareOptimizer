@@ -16,7 +16,7 @@ def main(
     num_positions=60,
     target_active_share=0.55,
     sector_tolerance=0.03,
-    min_position=0.0,
+    min_position=0.1,
     max_position=5.0,
     core_rank_limit=3,
     forced_positions=None,
@@ -45,6 +45,7 @@ def main(
     - optimized_active_share: The new Active Share after optimization
     - output_file: Path to the saved Excel file with results
     - solver_status: Status of the solver after optimization
+    - original_active_share: The original Active Share before optimization
     """
         # Load all data from single input file
     stocks_data, total_active_share, stocks_to_avoid, sector_constraints, locked_tickers = load_optimizer_input_file(data_file_path)
@@ -64,7 +65,36 @@ def main(
         print(f"Using position increment size: {increment}%")
     else:
         print("Not enforcing position increment size (using continuous weights)")
-        
+
+    # Pre-optimization feasibility checks
+    num_locked = len(locked_tickers)
+    if num_locked > num_positions:
+        raise ValueError(
+            f"Infeasible: {num_locked} locked tickers but only {num_positions} positions requested. "
+            f"Increase num_positions to at least {num_locked}."
+        )
+
+    if min_position > max_position:
+        raise ValueError(
+            f"Infeasible: min_position ({min_position}%) > max_position ({max_position}%)"
+        )
+
+    locked_weight_sum = sum(locked_tickers.values())
+    if locked_weight_sum > 100:
+        raise ValueError(
+            f"Infeasible: Locked ticker weights sum to {locked_weight_sum:.2f}% (exceeds 100%)"
+        )
+
+    # Count eligible stocks (benchmark stocks with Core Model <= limit, not in avoid list)
+    eligible_count = len(stocks_data[
+        (stocks_data['Bench Weight'] > 0) &
+        (stocks_data['Core Model'] <= core_rank_limit) &
+        (~stocks_data['Ticker'].isin(stocks_to_avoid))
+    ])
+    if eligible_count < num_positions:
+        print(f"Warning: Only {eligible_count} eligible stocks for {num_positions} positions. "
+              f"Consider relaxing core_rank_limit or stocks_to_avoid.")
+
     # Run the optimizer
     new_portfolio, added_stocks, optimized_active_share, solver_status = optimize_portfolio_pulp(
         stocks_data, 
@@ -350,7 +380,7 @@ def main(
         output_timestamp=timestamp
     )
 
-    return new_portfolio, added_stocks, optimized_active_share, output_file, solver_status
+    return new_portfolio, added_stocks, optimized_active_share, output_file, solver_status, total_active_share
 
 if __name__ == "__main__":
     main() 

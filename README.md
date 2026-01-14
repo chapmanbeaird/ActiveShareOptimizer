@@ -2,7 +2,7 @@
 
 An interactive portfolio optimization tool that helps portfolio managers adjust their stock holdings to achieve a target Active Share while respecting sector, position size, and other constraints. Powered by PuLP and the CBC Solver for mixed-integer linear programming optimization.
 
-## 🌟 Features
+## Features
 
 - **Portfolio Analysis**: Load your current portfolio, benchmark weights, and constraints from a single Excel file
 - **Ticker Locking**: Lock specific stocks to maintain their exact current weights
@@ -13,12 +13,12 @@ An interactive portfolio optimization tool that helps portfolio managers adjust 
 - **Flexible Timeout**: Control how long the optimizer runs to balance speed and solution quality
 - **Detailed Reports**: Export comprehensive Excel reports with portfolio, sector, and subsector analysis
 
-## 📋 Requirements
+## Requirements
 
 - Python 3.8 or higher (Python 3.11 recommended for best compatibility)
 - Python packages: streamlit, pandas, numpy, pulp, coinor-cbc, openpyxl
 
-## 🚀 Installation
+## Installation
 
 ### Using Setup Scripts (Recommended)
 
@@ -84,23 +84,7 @@ We provide setup scripts for both Mac/Linux and Windows that will automatically 
    pip install -r requirements.txt
    ```
 
-### Alternative Installation: Using Conda
-
-1. **Install Miniconda**
-   - Download and install from [docs.conda.io](https://docs.conda.io/en/latest/miniconda.html)
-
-2. **Create and activate a conda environment**
-   ```bash
-   conda create -n activeshare python=3.11 coin-or-cbc pulp pandas numpy scipy openpyxl xlrd matplotlib -c conda-forge
-   conda activate activeshare
-   ```
-
-3. **Install remaining dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-## 🏃‍♂️ Running the Application
+## Running the Application
 
 1. **Start the web app**
    ```bash
@@ -118,7 +102,7 @@ We provide setup scripts for both Mac/Linux and Windows that will automatically 
 
 4. **Adjust parameters in the sidebar** and click "Run Optimizer"
 
-## 📊 Input File Format
+## Input File Format
 
 ### Optimizer Input Excel Format
 Your Excel file (`optimizer_input_file.xlsm`) should include:
@@ -138,7 +122,7 @@ Your Excel file (`optimizer_input_file.xlsm`) should include:
 - `Emp Sector & Industry` column - Sector constraints to target
 - `Weight` column - Target weight for the sector
 
-## 📊 Ticker Locking Feature
+## Ticker Locking Feature
 
 The new "Lock ticker-and-weight" functionality allows you to:
 
@@ -147,7 +131,7 @@ The new "Lock ticker-and-weight" functionality allows you to:
 3. This is useful for positions you don't want to buy or sell
 4. Locked tickers override other constraints (they will be included regardless of Core Model ranking)
 
-## ⚙️ Optimizer Parameters
+## Optimizer Parameters
 
 | Parameter | Description |
 |-----------|-------------|
@@ -160,7 +144,7 @@ The new "Lock ticker-and-weight" functionality allows you to:
 | **Position Increment Size (%)** | Step size for position sizing (if using discrete mode) |
 | **Solver Timeout (seconds)** | Maximum time allowed for optimization |
 
-## 🗂️ Directory Structure
+## Directory Structure
 
 ```
 ActiveShareOptimizer/
@@ -189,9 +173,7 @@ ActiveShareOptimizer/
     └── Optimized_Portfolio_PuLP_*.xlsx
 ```
 
-## 🔧 Troubleshooting
-
-### Common Issues
+## Common Issues
 
 1. **Solver issues**
    - The `coinor-cbc` package should automatically install the CBC solver
@@ -213,6 +195,6 @@ ActiveShareOptimizer/
    - Consider reducing the number of constraints
    - Simplify sector constraints
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
