@@ -103,7 +103,7 @@ def main():
     if input_file:
         try:
             input_file.seek(0)
-            temp_stocks_data, file_active_share, file_stocks_to_avoid, file_sector_constraints, file_locked_tickers = load_optimizer_input_file(input_file)
+            temp_stocks_data, file_active_share, file_stocks_to_avoid, file_sector_constraints, file_locked_tickers, file_force_include = load_optimizer_input_file(input_file)
             all_tickers = sorted(temp_stocks_data['Ticker'].unique())
 
             # Store for later use
@@ -112,7 +112,8 @@ def main():
                 'active_share': file_active_share,
                 'stocks_to_avoid': file_stocks_to_avoid,
                 'sector_constraints': file_sector_constraints,
-                'locked_tickers': file_locked_tickers
+                'locked_tickers': file_locked_tickers,
+                'force_include_tickers': file_force_include
             }
 
             # --- Pre-Optimization Data Preview ---
@@ -123,7 +124,7 @@ def main():
             benchmark_stocks = len(temp_stocks_data[temp_stocks_data['Bench Weight'] > 0])
 
             # Display in columns
-            col1, col2, col3, col4 = st.columns(4)
+            col1, col2, col3, col4, col5 = st.columns(5)
             with col1:
                 st.metric("Current Active Share", f"{file_active_share:.2f}%")
             with col2:
@@ -131,6 +132,8 @@ def main():
             with col3:
                 st.metric("Locked Tickers", len(file_locked_tickers))
             with col4:
+                st.metric("Force-Include", len(file_force_include))
+            with col5:
                 st.metric("Stocks to Avoid", len(file_stocks_to_avoid))
 
             # Show locked tickers if any
@@ -143,6 +146,13 @@ def main():
                     st.dataframe(locked_df, hide_index=True, use_container_width=True)
                     total_locked = sum(file_locked_tickers.values())
                     st.caption(f"Total locked weight: {total_locked:.2f}%")
+
+            # Show force-include tickers if any
+            if file_force_include:
+                with st.expander(f"📌 View Force-Include Tickers ({len(file_force_include)})"):
+                    force_df = pd.DataFrame([{"Ticker": t} for t in sorted(file_force_include)])
+                    st.dataframe(force_df, hide_index=True, use_container_width=True)
+                    st.caption("These tickers will be included but their weights will be optimized within position size bounds.")
 
         except Exception as e:
             st.error(f"Error loading file: {e}")
@@ -289,6 +299,7 @@ def main():
         stocks_data = file_data['stocks_data']
         locked_tickers = file_data['locked_tickers']
         stocks_to_avoid = file_data['stocks_to_avoid']
+        force_include_tickers = file_data.get('force_include_tickers', set())
 
         # Calculate eligible stocks
         eligible_stocks = stocks_data[
@@ -303,6 +314,9 @@ def main():
 
         if len(locked_tickers) > num_positions:
             warnings.append(f"⚠️ **Too many locked tickers**: {len(locked_tickers)} locked but only {num_positions} positions requested")
+
+        if len(locked_tickers) + len(force_include_tickers) > num_positions:
+            warnings.append(f"⚠️ **Too many required tickers**: {len(locked_tickers)} locked + {len(force_include_tickers)} force-include = {len(locked_tickers) + len(force_include_tickers)} but only {num_positions} positions requested")
 
         if eligible_count < num_positions:
             warnings.append(f"⚠️ **Not enough eligible stocks**: Only {eligible_count} stocks meet criteria (Core Rank ≤ {core_rank_limit}, not in avoid list) for {num_positions} positions")
@@ -429,7 +443,7 @@ def main():
             )
         elif len(new_portfolio) > 0 and len(new_portfolio) <= 5:  # Likely a fallback solution with just locked tickers
             # Get the original active share from the data
-            _, original_active_share, _, _, _ = load_optimizer_input_file(input_path)
+            _, original_active_share, _, _, _, _ = load_optimizer_input_file(input_path)
             
             st.warning(f"""
             ### Fallback Solution with Locked Tickers Only
@@ -460,7 +474,7 @@ def main():
                 )
         else:
             # Get the original data for comparison
-            original_stocks_data, original_active_share, _, _, original_locked = load_optimizer_input_file(input_path)
+            original_stocks_data, original_active_share, _, _, original_locked, _ = load_optimizer_input_file(input_path)
 
             # Calculate turnover metrics
             original_positions = set(original_stocks_data[original_stocks_data['Portfolio Weight'] > 0]['Ticker'].tolist())
@@ -517,7 +531,7 @@ def main():
         
             
             # Get the original data to extract sector information (needed for multiple sections)
-            stocks_data, _, _, _, _ = load_optimizer_input_file(input_path)
+            stocks_data, _, _, _, _, _ = load_optimizer_input_file(input_path)
 
             # Create mappings for tickers
             ticker_to_sector = {}

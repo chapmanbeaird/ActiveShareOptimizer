@@ -17,7 +17,8 @@ from optimizer.utils import calculate_active_share
 def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60, target_active_share=0.55,
                             sector_tolerance=0.03, high_level_sector_tolerance=0.03, stocks_to_avoid=None,
                             sector_constraints=None, min_position=1.0, max_position=5.0, core_rank_limit=3,
-                            increment=0.5, forced_positions=None, time_limit=120, locked_tickers=None):
+                            increment=0.5, forced_positions=None, time_limit=120, locked_tickers=None,
+                            force_include_tickers=None):
     """
     Optimize the portfolio to reduce Active Share while applying constraints.
 
@@ -37,6 +38,7 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
     - forced_positions: Dictionary {ticker: (min, max)}. For each ticker, require it to be in the portfolio with weight between min and max.
     - time_limit: Maximum time allowed for the solver (in seconds)
     - locked_tickers: Dictionary {ticker: weight}. For each ticker, require it to be in the portfolio with exactly its current weight.
+    - force_include_tickers: Set of tickers to force include in portfolio. Weight is optimized within min/max position bounds (not locked).
 
     Returns:
     - optimized_portfolio: Dictionary of ticker to weight for the optimized portfolio
@@ -53,7 +55,9 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
         forced_positions = {}
     if locked_tickers is None:
         locked_tickers = {}
-        
+    if force_include_tickers is None:
+        force_include_tickers = set()
+
     # If using increments, round locked ticker weights to the nearest increment
     if increment is not None and locked_tickers:
         rounded_locked_tickers = {}
@@ -82,7 +86,17 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
     
     if locked_tickers:
         print(f"Locked tickers that will maintain exact weight: {', '.join(locked_tickers.keys())}")
-    
+
+    # Add force-include tickers to forced_positions with standard min/max bounds
+    # These tickers are included in the portfolio but their weight is optimized (not locked)
+    for ticker in force_include_tickers:
+        if ticker not in forced_positions:  # Don't override UI-specified ranges
+            forced_positions[ticker] = (min_position, max_position)
+            print(f"Force-including ticker {ticker} with weight range {min_position}%-{max_position}%")
+
+    if force_include_tickers:
+        print(f"Force-include tickers (weight optimized): {', '.join(force_include_tickers)}")
+
     # Find current portfolio positions (stocks with positive weights)
     portfolio_stocks = stocks_data[stocks_data['Portfolio Weight'] > 0]
     current_positions = portfolio_stocks['Ticker'].nunique()

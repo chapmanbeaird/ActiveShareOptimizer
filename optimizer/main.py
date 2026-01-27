@@ -50,7 +50,7 @@ def main(
     - original_active_share: The original Active Share before optimization
     """
         # Load all data from single input file
-    stocks_data, total_active_share, stocks_to_avoid, sector_constraints, locked_tickers = load_optimizer_input_file(data_file_path)
+    stocks_data, total_active_share, stocks_to_avoid, sector_constraints, locked_tickers, force_include_tickers = load_optimizer_input_file(data_file_path)
     
     print(f"Active Share from data: {total_active_share:.2f}%")
     print(f"Loaded {len(stocks_data)} stock entries from {data_file_path}")
@@ -58,6 +58,7 @@ def main(
     print(f"Loaded {len(stocks_to_avoid)} stocks to avoid")
     print(f"Loaded {len(sector_constraints)} sector constraints")
     print(f"Found {len(locked_tickers)} locked tickers that will maintain their current weight")
+    print(f"Found {len(force_include_tickers)} force-include tickers (weight will be optimized)")
     
     # Print the input active share for confirmation
     print(f"\nInput Active Share for optimization: {total_active_share:.2f}%")
@@ -70,10 +71,17 @@ def main(
 
     # Pre-optimization feasibility checks
     num_locked = len(locked_tickers)
+    num_forced = len(force_include_tickers)
     if num_locked > num_positions:
         raise ValueError(
             f"Infeasible: {num_locked} locked tickers but only {num_positions} positions requested. "
             f"Increase num_positions to at least {num_locked}."
+        )
+    if num_locked + num_forced > num_positions:
+        raise ValueError(
+            f"Infeasible: {num_locked} locked + {num_forced} force-include tickers "
+            f"but only {num_positions} positions requested. "
+            f"Increase num_positions to at least {num_locked + num_forced}."
         )
 
     if min_position > max_position:
@@ -113,7 +121,8 @@ def main(
         forced_positions=forced_positions,
         time_limit=time_limit,
         increment=increment,
-        locked_tickers=locked_tickers
+        locked_tickers=locked_tickers,
+        force_include_tickers=force_include_tickers
     )
     
     

@@ -95,6 +95,7 @@ def load_optimizer_input_file(file_path):
     - Stocks to avoid
     - Sector constraints
     - Locked ticker-and-weights
+    - Force-include tickers (included but weight not locked)
 
     Returns:
     - stocks_data: DataFrame containing stock data
@@ -102,6 +103,7 @@ def load_optimizer_input_file(file_path):
     - stocks_to_avoid: List of ticker symbols to exclude from the portfolio
     - sector_constraints: Dictionary mapping sector-and-subsector to target weights
     - locked_tickers: Dictionary {ticker: weight} of tickers that should not be changed
+    - force_include_tickers: Set of tickers to force include (weight determined by optimizer)
     """
     # Read the Excel file
     data = pd.read_excel(file_path, sheet_name=0)
@@ -166,11 +168,25 @@ def load_optimizer_input_file(file_path):
 
     if 'Lock Ticker-and-Weight' in data.columns:
         locked_data = data[data['Lock Ticker-and-Weight'].astype(str).str.strip().str.upper() == 'Y']
-        
+
         for _, row in locked_data.iterrows():
             if pd.notna(row['Ticker']) and pd.notna(row['Portfolio Weight']):
                 # Ticker already normalized to uppercase earlier
                 locked_tickers[row['Ticker']] = row['Portfolio Weight']
+
+    # Get force-include tickers where 'Force Ticker' is 'Y'
+    # These tickers will be included in portfolio but weight is not locked
+    force_include_tickers = set()
+
+    if 'Force Ticker' in data.columns:
+        force_data = data[data['Force Ticker'].astype(str).str.strip().str.upper() == 'Y']
+
+        for _, row in force_data.iterrows():
+            if pd.notna(row['Ticker']):
+                ticker = row['Ticker']
+                # Don't add if already locked (lock takes precedence)
+                if ticker not in locked_tickers:
+                    force_include_tickers.add(ticker)
     # Get constraints from other sheets in the workbook
     try:
         constraints_data = pd.read_excel(file_path, sheet_name='Constraints')
@@ -196,4 +212,4 @@ def load_optimizer_input_file(file_path):
         # File doesn't exist (shouldn't happen at this point, but be safe)
         stocks_to_avoid = []
         sector_constraints = {}
-    return data, total_active_share, stocks_to_avoid, sector_constraints, locked_tickers 
+    return data, total_active_share, stocks_to_avoid, sector_constraints, locked_tickers, force_include_tickers 
