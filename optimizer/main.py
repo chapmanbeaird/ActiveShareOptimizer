@@ -16,6 +16,7 @@ def main(
     num_positions=60,
     target_active_share=0.55,
     sector_tolerance=0.03,
+    high_level_sector_tolerance=0.03,
     min_position=0.1,
     max_position=5.0,
     core_rank_limit=3,
@@ -25,20 +26,21 @@ def main(
 ):
     """
     Main function to run the optimizer with adjustable parameters.
-    
+
     Parameters:
     - data_file_path: Path to the input file (Excel or CSV)
     - constraints_file_path: Optional path to constraints file (for backward compatibility)
     - num_positions: Exact number of positions required in the portfolio
     - target_active_share: Target Active Share percentage (as a decimal)
-    - sector_tolerance: Maximum allowed deviation from benchmark sector weights (as a decimal)
+    - sector_tolerance: Maximum allowed deviation from benchmark subsector weights (as a decimal)
+    - high_level_sector_tolerance: Maximum allowed deviation from benchmark sector weights (as a decimal)
     - min_position: Minimum position size as a percentage (e.g., 1.0)
     - max_position: Maximum position size as a percentage (e.g., 5.0)
     - core_rank_limit: Only consider stocks with Core Model rank <= this value
     - forced_positions: Dictionary {ticker: (min, max)} for positions to force
     - time_limit: Maximum time allowed for the solver (in seconds)
     - increment: Allowed increment for position sizes (e.g., 0.5 for 0.5% increments)
-    
+
     Returns:
     - new_portfolio: Dictionary of ticker to weight for the optimized portfolio
     - added_stocks: List of stocks added to the portfolio
@@ -97,11 +99,12 @@ def main(
 
     # Run the optimizer
     new_portfolio, added_stocks, optimized_active_share, solver_status = optimize_portfolio_pulp(
-        stocks_data, 
+        stocks_data,
         original_active_share=total_active_share,
         num_positions=num_positions,
         target_active_share=target_active_share,
         sector_tolerance=sector_tolerance,
+        high_level_sector_tolerance=high_level_sector_tolerance,
         stocks_to_avoid=stocks_to_avoid,
         sector_constraints=sector_constraints,
         min_position=min_position,

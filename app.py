@@ -25,9 +25,9 @@ def timer_thread():
         time.sleep(1)
         optimization_time += 1
 
-def run_optimizer_thread(data_file_path, num_positions, target_active_share, sector_tolerance, 
-                        min_position, max_position, core_rank_limit, forced_positions, 
-                        time_limit, increment):
+def run_optimizer_thread(data_file_path, num_positions, target_active_share, sector_tolerance,
+                        high_level_sector_tolerance, min_position, max_position, core_rank_limit,
+                        forced_positions, time_limit, increment):
     global optimization_running, optimization_result
     try:
         optimization_result[0] = optimizer_main(
@@ -35,6 +35,7 @@ def run_optimizer_thread(data_file_path, num_positions, target_active_share, sec
             num_positions=num_positions,
             target_active_share=target_active_share,
             sector_tolerance=sector_tolerance,
+            high_level_sector_tolerance=high_level_sector_tolerance,
             min_position=min_position,
             max_position=max_position,
             core_rank_limit=core_rank_limit,
@@ -179,13 +180,15 @@ def main():
 
     with st.sidebar.expander("ℹ️ Parameter Guide"):
         st.markdown("""
-        **Total Positions**: Exact number of stocks in the final portfolio. 
+        **Total Positions**: Exact number of stocks in the final portfolio.
 
-        **Target Active Share**: Minimum deviation from benchmark 
+        **Target Active Share**: Minimum deviation from benchmark
+
+        **Sector Tolerance**: How much each high-level sector can deviate from benchmark. Lower = tighter tracking.
 
         **Subsector Tolerance**: How much each subsector can deviate from benchmark. Lower = tighter tracking.
 
-        **Position Size Bounds**: Min/max weight per stock. 
+        **Position Size Bounds**: Min/max weight per stock.
 
         **Core Rank Limit**: Only include stocks ranked 1-N by your core model. Lower = higher conviction only.
 
@@ -209,14 +212,23 @@ def main():
         step=0.5,
         help="Target Active Share percentage. The optimizer will try to achieve this level of active share."
     ) / 100.0  # Convert to decimal
-    
+
+    high_level_sector_tolerance = st.sidebar.slider(
+        "Sector Tolerance (%)",
+        min_value=0.0,
+        max_value=10.0,
+        value=3.0,
+        step=0.5,
+        help="Maximum allowed deviation from benchmark sector weights (high-level sectors)."
+    ) / 100.0  # Convert to decimal
+
     sector_tolerance = st.sidebar.slider(
         "Subsector Tolerance (%)",
         min_value=0.0,
         max_value=10.0,
         value=3.0,
         step=0.5,
-        help="Maximum allowed deviation from benchmark sector weights."
+        help="Maximum allowed deviation from benchmark subsector weights."
     ) / 100.0  # Convert to decimal
     
     min_position = st.sidebar.slider(
@@ -336,8 +348,8 @@ def main():
                 optimizer_thread = threading.Thread(
                     target=run_optimizer_thread,
                     args=(input_path, num_positions, target_active_share, sector_tolerance,
-                          min_position, max_position, core_rank_limit, forced_positions,
-                          time_limit, increment)
+                          high_level_sector_tolerance, min_position, max_position, core_rank_limit,
+                          forced_positions, time_limit, increment)
                 )
                 optimizer_thread.daemon = True
                 optimizer_thread.start()

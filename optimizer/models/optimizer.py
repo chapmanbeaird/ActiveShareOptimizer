@@ -14,19 +14,20 @@ from optimizer.utils import calculate_active_share
 
 
 
-def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60, target_active_share=0.55, 
-                            sector_tolerance=0.03, stocks_to_avoid=None, sector_constraints=None, 
-                            min_position=1.0, max_position=5.0, core_rank_limit=3, increment=0.5, forced_positions=None, time_limit=120,
-                            locked_tickers=None):
+def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60, target_active_share=0.55,
+                            sector_tolerance=0.03, high_level_sector_tolerance=0.03, stocks_to_avoid=None,
+                            sector_constraints=None, min_position=1.0, max_position=5.0, core_rank_limit=3,
+                            increment=0.5, forced_positions=None, time_limit=120, locked_tickers=None):
     """
     Optimize the portfolio to reduce Active Share while applying constraints.
-    
+
     Parameters:
     - stocks_data: DataFrame containing stock data
     - original_active_share: Original Active Share percentage
     - num_positions: Exact number of positions required in the portfolio
     - target_active_share: Target Active Share percentage
-    - sector_tolerance: Maximum allowed deviation from benchmark sector weights (in decimal)
+    - sector_tolerance: Maximum allowed deviation from benchmark subsector weights (in decimal)
+    - high_level_sector_tolerance: Maximum allowed deviation from benchmark sector weights (in decimal)
     - stocks_to_avoid: List of ticker symbols to exclude from the portfolio
     - sector_constraints: Dictionary mapping sector-and-subsector to target weights
     - min_position: Minimum position size as a percentage (e.g., 1.0)
@@ -36,7 +37,7 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
     - forced_positions: Dictionary {ticker: (min, max)}. For each ticker, require it to be in the portfolio with weight between min and max.
     - time_limit: Maximum time allowed for the solver (in seconds)
     - locked_tickers: Dictionary {ticker: weight}. For each ticker, require it to be in the portfolio with exactly its current weight.
-    
+
     Returns:
     - optimized_portfolio: Dictionary of ticker to weight for the optimized portfolio
     - added_stocks: List of stocks added to the portfolio
@@ -107,7 +108,16 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
         sector_stocks = stocks_data[stocks_data['Sector-and-Subsector'] == sector]
         sector_weight = sector_stocks['Bench Weight'].sum()
         benchmark_sector_weights[sector] = sector_weight
-    
+
+    # Calculate benchmark weights for high-level sectors
+    benchmark_high_level_sector_weights = {}
+    for sector in stocks_data['Sector'].unique():
+        if pd.isna(sector):
+            continue
+        sector_stocks = stocks_data[stocks_data['Sector'] == sector]
+        sector_weight = sector_stocks['Bench Weight'].sum()
+        benchmark_high_level_sector_weights[sector] = sector_weight
+
     # Print sector differences
     print("\nCurrent sector-and-subsector differences (Portfolio - Benchmark):")
     sector_diffs = {}
@@ -449,6 +459,13 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
             subsector_weight = pulp.lpSum(weight[i] for i in subsector_to_stocks[subsector])
             model += subsector_weight >= target_weight - sector_tolerance * 100
             model += subsector_weight <= target_weight + sector_tolerance * 100
+
+    # High-level sector weight constraints
+    for sector, bench_weight in benchmark_high_level_sector_weights.items():
+        if sector in sector_to_stocks:
+            sector_weight = pulp.lpSum(weight[i] for i in sector_to_stocks[sector])
+            model += sector_weight >= bench_weight - high_level_sector_tolerance * 100
+            model += sector_weight <= bench_weight + high_level_sector_tolerance * 100
 
     # Solve the model using portable solver detection
     # Try PULP_CBC_CMD first (auto-detects solver path), fall back to common locations
