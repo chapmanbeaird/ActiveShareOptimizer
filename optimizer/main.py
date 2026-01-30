@@ -22,7 +22,9 @@ def main(
     core_rank_limit=3,
     forced_positions=None,
     time_limit=120,
-    increment=0.5
+    increment=0.5,
+    max_sector_position_ratio=None,
+    max_subsector_position_ratio=None
 ):
     """
     Main function to run the optimizer with adjustable parameters.
@@ -40,6 +42,8 @@ def main(
     - forced_positions: Dictionary {ticker: (min, max)} for positions to force
     - time_limit: Maximum time allowed for the solver (in seconds)
     - increment: Allowed increment for position sizes (e.g., 0.5 for 0.5% increments)
+    - max_sector_position_ratio: Max ratio a single position can be of its sector's total (e.g., 0.5 = 50%). None to disable.
+    - max_subsector_position_ratio: Max ratio a single position can be of its subsector's total (e.g., 0.5 = 50%). None to disable.
 
     Returns:
     - new_portfolio: Dictionary of ticker to weight for the optimized portfolio
@@ -122,7 +126,9 @@ def main(
         time_limit=time_limit,
         increment=increment,
         locked_tickers=locked_tickers,
-        force_include_tickers=force_include_tickers
+        force_include_tickers=force_include_tickers,
+        max_sector_position_ratio=max_sector_position_ratio,
+        max_subsector_position_ratio=max_subsector_position_ratio
     )
     
     

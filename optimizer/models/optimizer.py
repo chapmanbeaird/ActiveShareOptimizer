@@ -18,7 +18,8 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
                             sector_tolerance=0.03, high_level_sector_tolerance=0.03, stocks_to_avoid=None,
                             sector_constraints=None, min_position=1.0, max_position=5.0, core_rank_limit=3,
                             increment=0.5, forced_positions=None, time_limit=120, locked_tickers=None,
-                            force_include_tickers=None):
+                            force_include_tickers=None, max_sector_position_ratio=None,
+                            max_subsector_position_ratio=None):
     """
     Optimize the portfolio to reduce Active Share while applying constraints.
 
@@ -39,6 +40,8 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
     - time_limit: Maximum time allowed for the solver (in seconds)
     - locked_tickers: Dictionary {ticker: weight}. For each ticker, require it to be in the portfolio with exactly its current weight.
     - force_include_tickers: Set of tickers to force include in portfolio. Weight is optimized within min/max position bounds (not locked).
+    - max_sector_position_ratio: Maximum ratio a single position can be of its sector's total weight (e.g., 0.5 = no position > 50% of sector). None to disable.
+    - max_subsector_position_ratio: Maximum ratio a single position can be of its subsector's total weight (e.g., 0.5 = no position > 50% of subsector). None to disable.
 
     Returns:
     - optimized_portfolio: Dictionary of ticker to weight for the optimized portfolio
@@ -480,6 +483,43 @@ def optimize_portfolio_pulp(stocks_data, original_active_share, num_positions=60
             sector_weight = pulp.lpSum(weight[i] for i in sector_to_stocks[sector])
             model += sector_weight >= bench_weight - high_level_sector_tolerance * 100
             model += sector_weight <= bench_weight + high_level_sector_tolerance * 100
+
+    # Max position ratio constraints for sectors
+    # Ensures no single position can exceed a certain fraction of its sector's total weight
+    # This helps distribute weight more evenly within sectors
+    if max_sector_position_ratio is not None and max_sector_position_ratio < 1.0:
+        print(f"\nApplying max sector position ratio constraint: {max_sector_position_ratio*100:.0f}%")
+        sector_constraint_count = 0
+        for sector_idx, (sector, stock_indices) in enumerate(sector_to_stocks.items()):
+            if len(stock_indices) > 1:  # Only apply if sector has multiple stocks
+                # For each stock i in sector: weight[i] <= max_ratio * sum(weight[j] for j in sector)
+                sector_total = pulp.lpSum(weight[i] for i in stock_indices)
+                for i in stock_indices:
+                    ticker = all_stocks[i]['ticker']
+                    # Skip locked tickers - they must maintain their exact weight
+                    if ticker in locked_tickers:
+                        continue
+                    model += weight[i] <= max_sector_position_ratio * sector_total, f"max_sec_ratio_{sector_idx}_{i}"
+                    sector_constraint_count += 1
+        print(f"  Added {sector_constraint_count} sector position ratio constraints")
+
+    # Max position ratio constraints for subsectors
+    # Ensures no single position can exceed a certain fraction of its subsector's total weight
+    # This helps distribute weight more evenly within subsectors (prevents dumping excess into one stock)
+    if max_subsector_position_ratio is not None and max_subsector_position_ratio < 1.0:
+        print(f"Applying max subsector position ratio constraint: {max_subsector_position_ratio*100:.0f}%")
+        subsector_constraint_count = 0
+        for subsector_idx, (subsector, stock_indices) in enumerate(subsector_to_stocks.items()):
+            if len(stock_indices) > 1:  # Only apply if subsector has multiple stocks
+                subsector_total = pulp.lpSum(weight[i] for i in stock_indices)
+                for i in stock_indices:
+                    ticker = all_stocks[i]['ticker']
+                    # Skip locked tickers - they must maintain their exact weight
+                    if ticker in locked_tickers:
+                        continue
+                    model += weight[i] <= max_subsector_position_ratio * subsector_total, f"max_subsec_ratio_{subsector_idx}_{i}"
+                    subsector_constraint_count += 1
+        print(f"  Added {subsector_constraint_count} subsector position ratio constraints")
 
     # Solve the model using portable solver detection
     # Try PULP_CBC_CMD first (auto-detects solver path), fall back to common locations

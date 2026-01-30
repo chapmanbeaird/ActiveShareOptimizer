@@ -27,7 +27,8 @@ def timer_thread():
 
 def run_optimizer_thread(data_file_path, num_positions, target_active_share, sector_tolerance,
                         high_level_sector_tolerance, min_position, max_position, core_rank_limit,
-                        forced_positions, time_limit, increment):
+                        forced_positions, time_limit, increment, max_sector_position_ratio,
+                        max_subsector_position_ratio):
     global optimization_running, optimization_result
     try:
         optimization_result[0] = optimizer_main(
@@ -41,7 +42,9 @@ def run_optimizer_thread(data_file_path, num_positions, target_active_share, sec
             core_rank_limit=core_rank_limit,
             forced_positions=forced_positions,
             time_limit=time_limit,
-            increment=increment
+            increment=increment,
+            max_sector_position_ratio=max_sector_position_ratio,
+            max_subsector_position_ratio=max_subsector_position_ratio
         )
     except Exception as e:
         print(f"Error in optimizer thread: {e}")
@@ -203,6 +206,8 @@ def main():
         **Core Rank Limit**: Only include stocks ranked 1-N by your core model. Lower = higher conviction only.
 
         **Position Increments**: If enabled, weights snap to 0.5% increments (e.g., 1.0%, 1.5%, 2.0%). Helps with practical implementation.
+
+        **Weight Distribution**: Controls how weight is distributed within sectors/subsectors. When benchmark stocks have similar weights (no dominant stock), this prevents the optimizer from arbitrarily concentrating excess weight in one position. At 50%, no single position can exceed half of its sector/subsector allocation.
         """)
 
     num_positions = st.sidebar.slider(
@@ -293,7 +298,46 @@ def main():
             step=0.1,
             help="Allowed increment for position sizes."
         )
-    
+
+    # --- Weight Distribution Controls ---
+    st.sidebar.header("Weight Distribution")
+
+    use_sector_balance = st.sidebar.checkbox(
+        "Limit Sector Position Concentration",
+        value=True,
+        help="Prevents a single position from dominating its sector's weight allocation."
+    )
+
+    max_sector_position_ratio = None
+    if use_sector_balance:
+        max_sector_position_pct = st.sidebar.slider(
+            "Max Position % of Sector",
+            min_value=20,
+            max_value=100,
+            value=50,
+            step=5,
+            help="No single position can exceed this percentage of its sector's total weight. Lower values = more even distribution."
+        )
+        max_sector_position_ratio = max_sector_position_pct / 100.0
+
+    use_subsector_balance = st.sidebar.checkbox(
+        "Limit Subsector Position Concentration",
+        value=True,
+        help="Prevents a single position from dominating its subsector's weight allocation."
+    )
+
+    max_subsector_position_ratio = None
+    if use_subsector_balance:
+        max_subsector_position_pct = st.sidebar.slider(
+            "Max Position % of Subsector",
+            min_value=20,
+            max_value=100,
+            value=50,
+            step=5,
+            help="No single position can exceed this percentage of its subsector's total weight. Lower values = more even distribution."
+        )
+        max_subsector_position_ratio = max_subsector_position_pct / 100.0
+
     # --- Feasibility Warnings ---
     if file_data is not None:
         stocks_data = file_data['stocks_data']
@@ -363,7 +407,8 @@ def main():
                     target=run_optimizer_thread,
                     args=(input_path, num_positions, target_active_share, sector_tolerance,
                           high_level_sector_tolerance, min_position, max_position, core_rank_limit,
-                          forced_positions, time_limit, increment)
+                          forced_positions, time_limit, increment, max_sector_position_ratio,
+                          max_subsector_position_ratio)
                 )
                 optimizer_thread.daemon = True
                 optimizer_thread.start()
